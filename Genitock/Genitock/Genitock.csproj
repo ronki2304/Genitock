@@ -16,7 +16,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -89,6 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entity\Chart.cs" />
+    <Compile Include="Entity\Genotick\GenotickConfig.cs" />
     <Compile Include="Entity\Poloniex\Enum.cs" />
     <Compile Include="Extension\MethodAdd.cs" />
     <Compile Include="Genotick\InputData.cs" />

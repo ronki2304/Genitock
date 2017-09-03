@@ -1,4 +1,5 @@
-﻿using Genitock.Entity.Poloniex;
+﻿using Genitock.Entity.Genotick;
+using Genitock.Entity.Poloniex;
 using Genitock.Genotick;
 using Genitock.Poloniex;
 using Newtonsoft.Json;
@@ -38,6 +39,7 @@ namespace Genitock
             }
             if (mode == "CSV")
             {
+                //example : mode=CSV dtStart=01/01/1970 dtEnd=01/01/2090 Period=m5 Pair=BTC_ETH ExportPath=c:\temp
                 DateTime dtstart, dtEnd;
                 Period period;
                 Pair pair;
@@ -92,10 +94,7 @@ namespace Genitock
 
 
                     Console.WriteLine("Optional parameter dtStart,dtEnd");
-                    Console.WriteLine("the date must be written as it is showed on systray")
-
-
-
+                    Console.WriteLine("the date must be written as it is showed on systray");
 
                     Console.ReadLine();
                     return;
@@ -103,6 +102,11 @@ namespace Genitock
                 ExportData(pair, dtstart, dtEnd, period, ExportPath);
             }
 
+            if (mode=="LIVE")
+            {
+                runtime();
+
+            }
         }
 
         private static void ExportData(Pair pair, DateTime dtstart, DateTime dtstop, Period period, String ExportPath)
@@ -115,5 +119,30 @@ namespace Genitock
             InputData.SaveToCSV(pair, chart, ExportPath);
         }
 
+        static void runtime()
+        {
+            
+            //load config file
+                String sconfigfilePath = Path.Combine(ConfigurationManager.AppSettings["genotick_Path"]
+                    , ConfigurationManager.AppSettings["genotick_configfileName"]);
+            
+            if (!File.Exists(sconfigfilePath))
+            {
+                Console.WriteLine("Config File not found please update genitock config file");
+                return;
+            }
+            GenotickConfig config = new GenotickConfig(ConfigurationManager.AppSettings["genotick_Path"], ConfigurationManager.AppSettings["genotick_configfileName"]);
+            Console.WriteLine(config.DataDirectory);
+            //find 
+
+            //verifier qu'il y a un fichier de data
+            //completer ce fichier en ajoutant les dernieres lignes manquantes
+            //faire le reverse
+            //appeler genotick avec un fichier de paramètre
+            //positionner les ordres sur le marché
+            //positionner une limite
+            //cloture la position au bout de 5 minutes
+        }
     }
 }
+

@@ -24,9 +24,13 @@ namespace Genitock.Poloniex
         /// 4 periode
         /// </summary>
         const String GetUrl = "https://poloniex.com/public?command=returnChartData&currencyPair={0}&start={1}&end={2}&period={3}";
+
+        /// <summary>
+        /// Post url to manage Poloniex account
+        /// </summary>
+        String PostUrl = "https://poloniex.com/tradingApi";
         public Chart GetChartData(Pair pair,DateTime dtStart, DateTime dtEnd, Period period)
         { 
-            //const String PostUrl = "https://poloniex.com/public?command=returnTicker";
             String url = String.Format(GetUrl
                 , pair
                 , dtStart.getUnixTime()
@@ -36,31 +40,14 @@ namespace Genitock.Poloniex
 
             var content = client.DownloadString(url);
             Chart tickings = JsonConvert.DeserializeObject<Chart>("{	\"MyArray\": " + content + "}");
-            ////conversion to CSV
-            //List<String> CSVline = new List<string>();
-
-            //foreach (var item in tickings.MyArray.OrderBy(p => p.date))
-            //{
-
-            //    String Line = String.Concat(
-            //        item.StandartTime.ToString("yyyyMMddHHmmss")
-            //        , ","
-            //        , item.open.ToString(CultureInfo.InvariantCulture)
-            //        , ","
-            //        , item.high.ToString(CultureInfo.InvariantCulture)
-            //        , ","
-            //        , item.low.ToString(CultureInfo.InvariantCulture)
-            //        , ","
-            //        , item.close.ToString(CultureInfo.InvariantCulture)
-            //        );
-            //    CSVline.Add(Line);
-            //}
+            
+            
             return tickings;
 
         }
         private void ReturnBalance()
         {
-            String PostUrl = "https://poloniex.com/tradingApi";
+            
             WebClient client = new WebClient();
             client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
             client.Headers["key"] = ApiKey;

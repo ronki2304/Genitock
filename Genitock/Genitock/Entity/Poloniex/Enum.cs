@@ -107,12 +107,12 @@ namespace Genitock.Entity.Poloniex
 
     public enum Period
     {
-        = 300,
-         = 900,
-         = 1800,
-        = 7200,
-        = 14400,
-        = 86400
+       m5 = 300,
+        m15 = 900,
+        m30 = 1800,
+       h2 = 7200,
+       h4 = 14400,
+       d1 = 86400
 
     }
 }
