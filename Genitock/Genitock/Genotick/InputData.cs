@@ -1,6 +1,7 @@
 ﻿using Genitock.Entity;
 using Genitock.Entity.Genotick;
 using Genitock.Entity.Poloniex;
+using Genitock.Utility;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -14,10 +15,10 @@ namespace Genitock.Genotick
     public class InputData
     {
         #region write new file
-        public static void WriteToCSVFile(Pair pair, Chart data, String outputDirectory)
+        public static void WriteToCSVFile(Chart data, String outputDirectory)
         {
-            String filename = Path.Combine(outputDirectory, String.Concat(pair.ToString(), ".csv"));
-            String reversefilename = Path.Combine(outputDirectory, String.Concat("reverse_", pair.ToString(), ".csv"));
+            String filename = Path.Combine(outputDirectory, String.Concat(data.pair.ToString(), ".csv"));
+            String reversefilename = Path.Combine(outputDirectory, String.Concat("reverse_", data.pair.ToString(), ".csv"));
 
             if (File.Exists(filename))
                 File.Delete(filename);
@@ -34,15 +35,15 @@ namespace Genitock.Genotick
                 return String.Concat(
                     item.StandartTime.ToString("yyyyMMddHHmmss")
                     , ","
-                    , item.open.ToString(CultureInfo.InvariantCulture)
+                    , String.Format(CultureInfo.InvariantCulture,"{0:F20}",item.open).TrimEnd('0')
                     , ","
-                    , item.high.ToString(CultureInfo.InvariantCulture)
+                    , String.Format(CultureInfo.InvariantCulture, "{0:F20}", item.high).TrimEnd('0')
                     , ","
-                    , item.low.ToString(CultureInfo.InvariantCulture)
+                    ,  String.Format(CultureInfo.InvariantCulture, "{0:F20}", item.low).TrimEnd('0')
                     , ","
-                    , item.close.ToString(CultureInfo.InvariantCulture)
+                    , String.Format(CultureInfo.InvariantCulture, "{0:F20}", item.close).TrimEnd('0')
                     , ","
-                    , item.volume.ToString(CultureInfo.InvariantCulture)
+                    , String.Format(CultureInfo.InvariantCulture, "{0:F20}", item.volume).TrimEnd('0')
                     , ","
                     , (int)item.StandartTime.DayOfWeek
                     );
@@ -55,17 +56,17 @@ namespace Genitock.Genotick
         #region AppendData
         /// <summary>
         /// complete the chart data file with the new one.
-        /// usefull for live mode before runnning genotick
-        /// take care of reversed data
+        /// use only for live mode
+        /// fill candle and reverse candle
         /// </summary>
         /// <param name="data"></param>
         /// <param name="filename"></param>
         public static void AppendChartDataFile(Chart data)
         {
             //Normal file
-            AppendChartDataFiles(data.Candles.ToList(), GenotickConfig.CurrenciesDataFile.First());
+            AppendChartDataFiles(data.Candles.ToList(), FileHelper.getFullFileName(data.pair,false));
             //Reversed one
-            AppendChartDataFiles(data.ReversedCandles.ToList(), GenotickConfig.ReverseCurrenciesDataFile.First());
+            AppendChartDataFiles(data.ReversedCandles.ToList(), FileHelper.getFullFileName(data.pair, true));
         }
 
         private static void AppendChartDataFiles(List<Candle> data, String FileName)
@@ -73,20 +74,20 @@ namespace Genitock.Genotick
             File.AppendAllLines(FileName, data.OrderBy(s => s.date).Select(item =>
             {
                 return String.Concat(
-                    item.StandartTime.ToString("yyyyMMddHHmmss")
-                    , ","
-                    , item.open.ToString(CultureInfo.InvariantCulture)
-                    , ","
-                    , item.high.ToString(CultureInfo.InvariantCulture)
-                    , ","
-                    , item.low.ToString(CultureInfo.InvariantCulture)
-                    , ","
-                    , item.close.ToString(CultureInfo.InvariantCulture)
-                    , ","
-                    , item.volume.ToString(CultureInfo.InvariantCulture)
-                    , ","
-                    , (int)item.StandartTime.DayOfWeek
-                    );
+                   item.StandartTime.ToString("yyyyMMddHHmmss")
+                   , ","
+                   , String.Format(CultureInfo.InvariantCulture, "{0:F20}", item.open).TrimEnd('0')
+                   , ","
+                   , String.Format(CultureInfo.InvariantCulture, "{0:F20}", item.high).TrimEnd('0')
+                   , ","
+                   , String.Format(CultureInfo.InvariantCulture, "{0:F20}", item.low).TrimEnd('0')
+                   , ","
+                   , String.Format(CultureInfo.InvariantCulture, "{0:F20}", item.close).TrimEnd('0')
+                   , ","
+                   , String.Format(CultureInfo.InvariantCulture, "{0:F20}", item.volume).TrimEnd('0')
+                   , ","
+                   , (int)item.StandartTime.DayOfWeek
+                   );
             }
 
            ).ToList());

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Genitock.Entity.Poloniex;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,8 @@ namespace Genitock.Entity
    public  class Chart
     { 
         public IList<Candle> Candles { get; set; }
+
+        public Pair pair { get; set; }
         public IList<Candle> ReversedCandles
         {
             get

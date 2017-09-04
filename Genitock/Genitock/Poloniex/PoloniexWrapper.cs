@@ -40,7 +40,7 @@ namespace Genitock.Poloniex
 
             var content = client.DownloadString(url);
             Chart tickings = JsonConvert.DeserializeObject<Chart>("{	\"Candles\": " + content + "}");
-            
+            tickings.pair = pair;
             
             return tickings;
 

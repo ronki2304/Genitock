@@ -116,7 +116,7 @@ namespace Genitock
             var chart = wrapper.GetChartData(pair, dtstart, dtstop, period);
 
             //write the file
-            InputData.WriteToCSVFile(pair, chart, ExportPath);
+            InputData.WriteToCSVFile(chart, ExportPath);
         }
 
         static void runtime()
@@ -133,20 +133,25 @@ namespace Genitock
             }
             //GenotickConfig config = new GenotickConfig();
 
-            //compute the interval date
+            //getting the last data
             //for the moment we supposed only one currencies
-            //todo manage multi currencies
-            var line = File.ReadLines(GenotickConfig.CurrenciesDataFile.First()).Last();
-            GenotickConfig.StartingPoint = DateTime.ParseExact(line.Split(',').First(), "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+            
+            //for moment assume that all csv have the same date
+           
 
             //retrieve missing candle
             PoloniexWrapper wrapper = new PoloniexWrapper();
-            FileInfo fi = new FileInfo(GenotickConfig.CurrenciesDataFile.First());
-            
-            var chart = wrapper.GetChartData((Pair) Enum.Parse(typeof(Pair),fi.Name.Substring(0, fi.Name.IndexOf(fi.Extension)))
-                , GenotickConfig.StartingPoint, DateTime.MaxValue, Period.m5);
 
-            InputData.AppendChartDataFile(chart);
+            //update all CSV
+
+            foreach (Pair pair in GenotickConfig.CurrenciesDataFileName)
+            {
+
+                var chart = wrapper.GetChartData(pair, GenotickConfig.StartingPoint, DateTime.MaxValue, GenotickConfig.PoloniexPeriod);
+
+                InputData.AppendChartDataFile(chart);
+
+            }
             //verifier qu'il y a un fichier de data
             //completer ce fichier en ajoutant les dernieres lignes manquantes
             //faire le reverse
