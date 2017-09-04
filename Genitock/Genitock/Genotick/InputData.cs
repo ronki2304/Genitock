@@ -12,10 +12,10 @@ namespace Genitock.Genotick
 {
    public class InputData
     {
-        public static void SaveToCSV(Pair pair,Chart data, String outputDirectory)  
+        public static void SaveToCSV(Pair pair,Chart data, String outputDirectory)
         {
-            String filename = Path.Combine(outputDirectory, String.Concat(pair.ToString(),".csv"));
-            String reversefilename = Path.Combine(outputDirectory, String.Concat("reverse_",pair.ToString(), ".csv"));
+            String filename = Path.Combine(outputDirectory, String.Concat(pair.ToString(), ".csv"));
+            String reversefilename = Path.Combine(outputDirectory, String.Concat("reverse_", pair.ToString(), ".csv"));
 
             if (File.Exists(filename))
                 File.Delete(filename);
@@ -24,9 +24,16 @@ namespace Genitock.Genotick
 
 
             //compute day of week
-            
 
-            File.WriteAllLines(filename, data.MyArray.Select(item => {
+
+            WriteFile(data, filename,false);
+
+        }
+
+        private static void WriteFile(Chart data, string filename, Boolean append)
+        {
+            File.WriteAllLines(filename, data.MyArray.Select(item =>
+            {
                 return String.Concat(
                     item.StandartTime.ToString("yyyyMMddHHmmss")
                     , ","
@@ -37,15 +44,14 @@ namespace Genitock.Genotick
                     , item.low.ToString(CultureInfo.InvariantCulture)
                     , ","
                     , item.close.ToString(CultureInfo.InvariantCulture)
-                    ,","
-                    ,item.volume.ToString(CultureInfo.InvariantCulture)
-                    ,","
-                    ,(int) item.StandartTime.DayOfWeek
+                    , ","
+                    , item.volume.ToString(CultureInfo.InvariantCulture)
+                    , ","
+                    , (int)item.StandartTime.DayOfWeek
                     );
             }
 
             ).ToList());
-
         }
 
         void ReverseData()

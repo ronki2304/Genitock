@@ -132,8 +132,19 @@ namespace Genitock
                 return;
             }
             GenotickConfig config = new GenotickConfig(ConfigurationManager.AppSettings["genotick_Path"], ConfigurationManager.AppSettings["genotick_configfileName"]);
-            Console.WriteLine(config.DataDirectory);
-            //find 
+
+            //compute the interval date
+            //for the moment we supposed only one currencies
+            //todo manage multi currencies
+            var line = File.ReadLines(config.CurrenciesDataFile.First()).Last();
+            config.StartingPoint = DateTime.ParseExact(line.Split(',').First(), "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+
+            //retrieve missing candle
+            PoloniexWrapper wrapper = new PoloniexWrapper();
+            FileInfo fi = new FileInfo(config.CurrenciesDataFile.First());
+            
+            var chart = wrapper.GetChartData((Pair) Enum.Parse(typeof(Pair),fi.Name.Substring(0, fi.Name.IndexOf(fi.Extension)))
+                , config.StartingPoint, DateTime.MaxValue, Period.m5);
 
             //verifier qu'il y a un fichier de data
             //completer ce fichier en ajoutant les dernieres lignes manquantes
