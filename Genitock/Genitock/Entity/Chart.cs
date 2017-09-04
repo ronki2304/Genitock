@@ -8,10 +8,34 @@ namespace Genitock.Entity
 { 
    public  class Chart
     { 
-        public IList<chartline> MyArray { get; set; }
+        public IList<Candle> Candles { get; set; }
+        public IList<Candle> ReversedCandles
+        {
+            get
+            {
+                return Candles.Select(p => new Candle
+                {
+                    date = p.date
+                    ,
+                    close = 1 / p.close
+                    ,
+                    high = 1 / p.high
+                    ,
+                    low = 1 / p.low
+                    ,
+                    open = 1 / p.open
+                    ,
+                    quotevolume = p.quotevolume
+                    ,
+                    volume = p.volume
+                    ,
+                    weightedAverage = p.weightedAverage
+                }).ToList();
+            }
+        }
     }
 
-    public class chartline
+    public class Candle
     {
         public DateTime StandartTime
         {

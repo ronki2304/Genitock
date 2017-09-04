@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -8,50 +9,52 @@ using System.Threading.Tasks;
 
 namespace Genitock.Entity.Genotick
 {
-    public class GenotickConfig
+    public static class GenotickConfig
     {
         /// <summary>
         /// Folder name which contains the ticker data
         /// </summary>
-        public String DataDirectory { get; private set; }
+        public static String DataDirectory { get; private set; }
         /// <summary>
         /// start date for genotick
         /// </summary>
-        public DateTime StartingPoint { get; set; }
+        public static DateTime StartingPoint { get; set; }
         /// <summary>
         /// end date for genotick
         /// </summary>
-        public DateTime EndingPoint { get; set; }
+        public static DateTime EndingPoint { get; set; }
 
         /// <summary>
         /// All currencies data file
         /// </summary>
-        public List<String> CurrenciesDataFile;
+        public static List<String> CurrenciesDataFile;
         /// <summary>
         /// All currencies reverse data file
         /// </summary>
-        public List<String> ReverseCurrenciesDataFile;
+        public static List<String> ReverseCurrenciesDataFile;
 
 
         /// <summary>
         /// store the confnig file path
         /// </summary>
-        private String ConfigPath;
+        private static String ConfigPath;
 
         /// <summary>
         /// genotick binary path
         /// </summary>
-        private String _GenotikPath;
+        private static String _GenotikPath;
 
         /// <summary>
         /// all config line
         /// </summary>
-        private List<String> configContent;
+        private static List<String> configContent;
 
 
        
-        public GenotickConfig(String Genotickpath, String configFileName)
+        static GenotickConfig()
         {
+            String Genotickpath = ConfigurationManager.AppSettings["genotick_Path"];
+            String configFileName = ConfigurationManager.AppSettings["genotick_configfileName"];
             String configfilepath = Path.Combine(Genotickpath, configFileName);
             ConfigPath = configfilepath;
             _GenotikPath = Genotickpath;
@@ -72,7 +75,7 @@ namespace Genitock.Entity.Genotick
         }
 
         ///Sauvegarde les nouvelles dates d'analyse
-        public void SaveConfig()
+        public static void SaveConfig()
         {
             String configfilepath = Path.Combine(_GenotikPath, ConfigPath);
             //update date interval

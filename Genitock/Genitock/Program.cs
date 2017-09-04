@@ -116,7 +116,7 @@ namespace Genitock
             var chart = wrapper.GetChartData(pair, dtstart, dtstop, period);
 
             //write the file
-            InputData.SaveToCSV(pair, chart, ExportPath);
+            InputData.WriteToCSVFile(pair, chart, ExportPath);
         }
 
         static void runtime()
@@ -131,21 +131,22 @@ namespace Genitock
                 Console.WriteLine("Config File not found please update genitock config file");
                 return;
             }
-            GenotickConfig config = new GenotickConfig(ConfigurationManager.AppSettings["genotick_Path"], ConfigurationManager.AppSettings["genotick_configfileName"]);
+            //GenotickConfig config = new GenotickConfig();
 
             //compute the interval date
             //for the moment we supposed only one currencies
             //todo manage multi currencies
-            var line = File.ReadLines(config.CurrenciesDataFile.First()).Last();
-            config.StartingPoint = DateTime.ParseExact(line.Split(',').First(), "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+            var line = File.ReadLines(GenotickConfig.CurrenciesDataFile.First()).Last();
+            GenotickConfig.StartingPoint = DateTime.ParseExact(line.Split(',').First(), "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
 
             //retrieve missing candle
             PoloniexWrapper wrapper = new PoloniexWrapper();
-            FileInfo fi = new FileInfo(config.CurrenciesDataFile.First());
+            FileInfo fi = new FileInfo(GenotickConfig.CurrenciesDataFile.First());
             
             var chart = wrapper.GetChartData((Pair) Enum.Parse(typeof(Pair),fi.Name.Substring(0, fi.Name.IndexOf(fi.Extension)))
-                , config.StartingPoint, DateTime.MaxValue, Period.m5);
+                , GenotickConfig.StartingPoint, DateTime.MaxValue, Period.m5);
 
+            InputData.AppendChartDataFile(chart);
             //verifier qu'il y a un fichier de data
             //completer ce fichier en ajoutant les dernieres lignes manquantes
             //faire le reverse
