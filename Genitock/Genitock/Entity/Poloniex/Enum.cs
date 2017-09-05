@@ -115,4 +115,14 @@ namespace Genitock.Entity.Poloniex
        d1 = 86400
 
     }
+    /// <summary>
+    /// market operation
+    /// </summary>
+    public enum Operation
+    {
+        buy,
+        sell,
+        Out
+    }
+
 }

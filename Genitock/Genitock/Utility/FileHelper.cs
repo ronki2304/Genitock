@@ -20,9 +20,9 @@ namespace Genitock.Utility
         public static String getFullFileName(Pair pair, Boolean Reverse)
         {            
             if (!Reverse)
-                return Path.Combine(GenotickConfig.DataDirectory, pair.ToString() + ".csv");
+                return Path.Combine(GenotickConfig.FullDataDirectory, pair.ToString() + ".csv");
             else
-                return Path.Combine(GenotickConfig.DataDirectory, String.Concat("reverse_", pair.ToString(), ".csv"));
+                return Path.Combine(GenotickConfig.FullDataDirectory, String.Concat("reverse_", pair.ToString(), ".csv"));
 
         }
     }

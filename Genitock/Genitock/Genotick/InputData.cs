@@ -26,7 +26,7 @@ namespace Genitock.Genotick
                 File.Delete(reversefilename);
 
             WriteToCSVFile(data.Candles.ToList(), filename);
-            WriteToCSVFile(data.ReversedCandles.ToList(), reversefilename);
+            
         }
         private static void WriteToCSVFile(List<Candle> candles, string filename)
         {
@@ -51,6 +51,20 @@ namespace Genitock.Genotick
 
             ).ToList());
         }
+        
+        /// <summary>
+        /// backup all data file in the backup folder
+        /// </summary>
+        public static void BackupData()
+        {
+            foreach(String path in Directory.GetFiles(GenotickConfig.FullDataDirectory))
+            {
+                FileInfo fi = new FileInfo(path);
+                fi.MoveTo(Path.Combine(GenotickConfig.DataBackupDirectory
+                    , String.Concat(DateTime.UtcNow.ToString("yyyyMMddHHmmss_"), fi.Name))
+                    );
+            }
+        }
         #endregion
 
         #region AppendData
@@ -66,7 +80,6 @@ namespace Genitock.Genotick
             //Normal file
             AppendChartDataFiles(data.Candles.ToList(), FileHelper.getFullFileName(data.pair,false));
             //Reversed one
-            AppendChartDataFiles(data.ReversedCandles.ToList(), FileHelper.getFullFileName(data.pair, true));
         }
 
         private static void AppendChartDataFiles(List<Candle> data, String FileName)

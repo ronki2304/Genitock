@@ -14,9 +14,23 @@ namespace Genitock.Genotick
     public static class GenotickConfig
     {
         /// <summary>
-        /// Folder name which contains the ticker data
+        /// contain the absolute data directory name
+        /// </summary>
+        public static String FullDataDirectory { get; private set; }
+
+        /// <summary>
+        /// contain only the the name of the data directory
         /// </summary>
         public static String DataDirectory { get; private set; }
+
+        public static String DataBackupDirectory
+        {
+            get
+            {
+                //todo parametrize this folder
+                return Path.Combine(FullDataDirectory, "Backup");
+            }
+        }
         /// <summary>
         /// max date already present in the CSV
         /// </summary>
@@ -40,9 +54,8 @@ namespace Genitock.Genotick
             get
             {
                 //calculate the last intervalle available for genotick
-                DateTime computedate=DateTime.MinValue;
-                computedate = StartingPoint.AddSeconds((Int32)PoloniexPeriod);
-                while (computedate < DateTime.UtcNow)
+                DateTime computedate= StartingPoint.AddSeconds((Int32)PoloniexPeriod);
+                while (computedate <= DateTime.UtcNow)
                 {
                     computedate =computedate.AddSeconds((Int32)PoloniexPeriod);
                 }
@@ -88,11 +101,15 @@ namespace Genitock.Genotick
             ConfigPath = configfilepath;
             _GenotikPath = Genotickpath;
             configContent = File.ReadAllLines(configfilepath).ToList();
-            DataDirectory = Path.Combine(Genotickpath, configContent.First(p => p.StartsWith("dataDirectory")).Substring(13).Trim());
+            DataDirectory = configContent.First(p => p.StartsWith("dataDirectory")).Substring(13).Trim();
+            FullDataDirectory = Path.Combine(Genotickpath,DataDirectory);
+
+            if (!Directory.Exists(DataBackupDirectory))
+                Directory.CreateDirectory(DataBackupDirectory);
 
             //store all normal file in the same variable and all reverse in another one in a dictionnary with the par as key
             //all file which are not started with reverse are the original file
-            foreach (var p in (Directory.GetFiles(DataDirectory).ToList().Where(p => !p.Contains("reverse"))))
+            foreach (var p in (Directory.GetFiles(FullDataDirectory).ToList().Where(p => !p.Contains("reverse"))))
             {
                 CurrenciesDataFileName.Add((Pair)Enum.Parse(typeof(Pair), p.Substring(0, p.IndexOf('.')).Substring(p.LastIndexOf('\\') + 1)));
             }

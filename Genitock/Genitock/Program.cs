@@ -127,8 +127,14 @@ namespace Genitock
             if (GenotickConfig.NextEndingPoint > DateTime.UtcNow)
                 return;
 
+            //backup data
+            InputData.BackupData();
+            
+            
             //update all CSV
             PoloniexWrapper wrapper = new PoloniexWrapper();
+
+
             foreach (Pair pair in GenotickConfig.CurrenciesDataFileName)
             {
                 //getting the last data
@@ -138,10 +144,13 @@ namespace Genitock
 
                 InputData.AppendChartDataFile(chart);
             }
+            //reverse data
+            GenotickExec.ReverseData();
 
             //update genotick config file
             GenotickConfig.SaveConfig();
-            //appeler genotick avec un fichier de paramètre
+            //call genotick to analyze
+            Console.WriteLine(GenotickExec.SetPrediction());
 
             //positionner les ordres sur le marché
             //positionner une limite
