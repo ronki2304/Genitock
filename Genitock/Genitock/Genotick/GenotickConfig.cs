@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Genitock.Entity.Genotick
+namespace Genitock.Genotick
 {
     public static class GenotickConfig
     {
@@ -18,9 +18,9 @@ namespace Genitock.Entity.Genotick
         /// </summary>
         public static String DataDirectory { get; private set; }
         /// <summary>
-        /// max date present in the CSV
+        /// max date already present in the CSV
         /// </summary>
-        public static DateTime LastEndingPoint { get; set; }
+        static DateTime PreviousEndingPoint { get; set; }
 
         /// <summary>
         /// Start date for the next run of genitock
@@ -29,13 +29,26 @@ namespace Genitock.Entity.Genotick
         {
             get
             {
-                return LastEndingPoint.AddSeconds((Int32)PoloniexPeriod);
+                return PreviousEndingPoint.AddSeconds((Int32)PoloniexPeriod);
             }
         }
         /// <summary>
-        /// end date for genotick
+        /// end date for the next genotick run
         /// </summary>
-        public static DateTime EndingPoint { get; set; }
+        public static DateTime NextEndingPoint
+        {
+            get
+            {
+                //calculate the last intervalle available for genotick
+                DateTime computedate=DateTime.MinValue;
+                computedate = StartingPoint.AddSeconds((Int32)PoloniexPeriod);
+                while (computedate < DateTime.UtcNow)
+                {
+                    computedate =computedate.AddSeconds((Int32)PoloniexPeriod);
+                }
+                return computedate.AddSeconds((Int32)PoloniexPeriod * -1);
+            }
+        }
 
         /// <summary>
         /// All currencies data file name
@@ -51,12 +64,12 @@ namespace Genitock.Entity.Genotick
         /// <summary>
         /// store the confnig file path
         /// </summary>
-        private static String ConfigPath;
+        internal static String ConfigPath;
 
         /// <summary>
         /// genotick binary path
         /// </summary>
-        private static String _GenotikPath;
+        internal static String _GenotikPath;
 
         /// <summary>
         /// all config line
@@ -64,7 +77,7 @@ namespace Genitock.Entity.Genotick
         private static List<String> configContent;
 
 
-       
+
         static GenotickConfig()
         {
             CurrenciesDataFileName = new List<Pair>();
@@ -85,22 +98,31 @@ namespace Genitock.Entity.Genotick
             }
 
             //compute the new starting point
-            
-            String line = File.ReadLines(FileHelper.getFullFileName(CurrenciesDataFileName.First(),false)).Last();
-            LastEndingPoint = DateTime.ParseExact(line.Split(',').First(), "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
-          
+
+            String line = File.ReadLines(FileHelper.getFullFileName(CurrenciesDataFileName.First(), false)).Last();
+            PreviousEndingPoint = DateTime.ParseExact(line.Split(',').First(), "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+
         }
 
-       
+
 
         ///Sauvegarde les nouvelles dates d'analyse
         public static void SaveConfig()
         {
             String configfilepath = Path.Combine(_GenotikPath, ConfigPath);
             //update date interval
-            configContent.Where(p => p.StartsWith("startTimePoint")).ToList().ForEach(s => s = String.Concat("startTimePoint " + LastEndingPoint.ToString("yyyyMMddHHmmss")));
-            configContent.Where(p => p.StartsWith("endTimePoint")).ToList().ForEach(s => s = String.Concat("endTimePoint " + LastEndingPoint.ToString("yyyyMMddHHmmss")));
-
+            for (int i =0;i<configContent.Count;i++)
+            {
+                if (configContent[i].StartsWith("startTimePoint"))
+                {
+                    configContent[i] = String.Concat("startTimePoint " + StartingPoint.ToString("yyyyMMddHHmmss"));
+                }
+                if (configContent[i].StartsWith("endTimePoint"))
+                {
+                    configContent[i] = String.Concat("endTimePoint " + NextEndingPoint.ToString("yyyyMMddHHmmss"));
+                }
+            }
+            File.WriteAllLines(configfilepath, configContent);
         }
     }
 }

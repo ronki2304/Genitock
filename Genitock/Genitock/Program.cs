@@ -1,20 +1,11 @@
-﻿using Genitock.Entity.Genotick;
+﻿using Genitock.Genotick;
 using Genitock.Entity.Poloniex;
-using Genitock.Genotick;
 using Genitock.Poloniex;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Security.Cryptography; 
-using System.Text;
-using System.Threading.Tasks; 
 
 namespace Genitock
 { 
@@ -121,7 +112,6 @@ namespace Genitock
 
         static void runtime()
         {
-            
             //load config file
                 String sconfigfilePath = Path.Combine(ConfigurationManager.AppSettings["genotick_Path"]
                     , ConfigurationManager.AppSettings["genotick_configfileName"]);
@@ -131,31 +121,28 @@ namespace Genitock
                 Console.WriteLine("Config File not found please update genitock config file");
                 return;
             }
-            //GenotickConfig config = new GenotickConfig();
 
-            //getting the last data
-            //for the moment we supposed only one currencies
             
-            //for moment assume that all csv have the same date
-           
-
-            //retrieve missing candle
-            PoloniexWrapper wrapper = new PoloniexWrapper();
+            //if we are already up to date do nothing
+            if (GenotickConfig.NextEndingPoint > DateTime.UtcNow)
+                return;
 
             //update all CSV
-
+            PoloniexWrapper wrapper = new PoloniexWrapper();
             foreach (Pair pair in GenotickConfig.CurrenciesDataFileName)
             {
-
+                //getting the last data
+                //for moment assume that all csv have the same date
+                //retrieve missing candle
                 var chart = wrapper.GetChartData(pair, GenotickConfig.StartingPoint, DateTime.MaxValue, GenotickConfig.PoloniexPeriod);
 
                 InputData.AppendChartDataFile(chart);
-
             }
-            //verifier qu'il y a un fichier de data
-            //completer ce fichier en ajoutant les dernieres lignes manquantes
-            //faire le reverse
+
+            //update genotick config file
+            GenotickConfig.SaveConfig();
             //appeler genotick avec un fichier de paramètre
+
             //positionner les ordres sur le marché
             //positionner une limite
             //cloture la position au bout de 5 minutes

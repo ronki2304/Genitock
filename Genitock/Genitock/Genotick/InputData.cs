@@ -1,5 +1,5 @@
 ﻿using Genitock.Entity;
-using Genitock.Entity.Genotick;
+using Genitock.Genotick;
 using Genitock.Entity.Poloniex;
 using Genitock.Utility;
 using System;

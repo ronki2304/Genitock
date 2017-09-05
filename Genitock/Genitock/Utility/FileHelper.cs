@@ -1,4 +1,4 @@
-﻿using Genitock.Entity.Genotick;
+﻿using Genitock.Genotick;
 using Genitock.Entity.Poloniex;
 using System;
 using System.Collections.Generic;

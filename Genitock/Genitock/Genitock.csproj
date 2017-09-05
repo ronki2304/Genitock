@@ -89,9 +89,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entity\Chart.cs" />
-    <Compile Include="Entity\Genotick\GenotickConfig.cs" />
+    <Compile Include="Genotick\GenotickConfig.cs" />
     <Compile Include="Entity\Poloniex\Enum.cs" />
     <Compile Include="Extension\MethodAdd.cs" />
+    <Compile Include="Genotick\GenotickExec.cs" />
     <Compile Include="Genotick\InputData.cs" />
     <Compile Include="Poloniex\PoloniexWrapper.cs" />
     <Compile Include="Program.cs" />
@@ -102,6 +103,9 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Entity\Genotick\" />
+    <Folder Include="Trading\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
