@@ -34,20 +34,10 @@ namespace Genitock.Genotick
                 string consoleLine = e.Data;
                 //handle data
                 Console.WriteLine(consoleLine);
-            });
-
-            proc.BeginOutputReadLine();
-            proc.WaitForExit();
-
-            /*while (!proc.StandardOutput.EndOfStream)
-            {
-                string line = proc.StandardOutput.ReadLine();
-                // do something with line
-                Console.WriteLine(line);
-                if (line.Contains(" for the next trade:") &&
-                    line.Contains(GenotickConfig.CurrenciesDataFileName.ToString()))
+                if (!String.IsNullOrEmpty(consoleLine) && consoleLine.Contains(" for the next trade:") &&
+                   consoleLine.Contains(GenotickConfig.CurrenciesDataFileName.ToString()))
                 {
-                    switch (line.Substring(line.IndexOf(':')).Trim())
+                    switch (consoleLine.Substring(consoleLine.IndexOf(':')).Trim())
                     {
                         case "UP":
                             prediction = Operation.buy;
@@ -61,7 +51,11 @@ namespace Genitock.Genotick
                             break;
                     }
                 }
-            }*/
+            });
+
+            proc.BeginOutputReadLine();
+            proc.WaitForExit();
+
             return prediction;
         }
 

@@ -151,7 +151,7 @@ namespace Genitock
             GenotickConfig.SaveConfig();
             //call genotick to analyze
             Console.WriteLine(GenotickExec.SetPrediction());
-
+            Console.ReadLine();
             //positionner les ordres sur le marché
             //positionner une limite
             //cloture la position au bout de 5 minutes

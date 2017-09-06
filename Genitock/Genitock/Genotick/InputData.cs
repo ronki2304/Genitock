@@ -57,12 +57,32 @@ namespace Genitock.Genotick
         /// </summary>
         public static void BackupData()
         {
-            foreach(String path in Directory.GetFiles(GenotickConfig.FullDataDirectory))
+            foreach(String path in Directory.GetFiles(GenotickConfig.FullNameDataDirectory))
             {
                 FileInfo fi = new FileInfo(path);
-                fi.MoveTo(Path.Combine(GenotickConfig.DataBackupDirectory
-                    , String.Concat(DateTime.UtcNow.ToString("yyyyMMddHHmmss_"), fi.Name))
+                //fi.MoveTo(Path.Combine(GenotickConfig.DataBackupDirectory
+                //    , String.Concat(DateTime.UtcNow.ToString("yyyyMMddHHmmss_"), fi.Name))
+                //    );
+                List<String> ovar = File.ReadAllLines(path).ToList();
+                List<String> tobackup = new List<string>();
+                List<String> tokeep = new List<string>();
+                for (int i=0;i<ovar.Count;i++)
+                {
+                    if (i <= ovar.Count()- GenotickConfig.dataMaximumOffset+1)
+                        tobackup.Add(ovar[i]);
+                    else
+                        tokeep.Add(ovar[i]);
+                }
+
+                //backup useless line
+                File.WriteAllLines(Path.Combine(GenotickConfig.DataBackupDirectory
+                        , String.Concat(DateTime.UtcNow.ToString("yyyyMMddHHmmss_"), fi.Name))
+                    , tobackup
                     );
+                
+                fi.Delete();
+                if (!fi.Name.StartsWith("reverse"))
+                    File.WriteAllLines(fi.FullName, tokeep);
             }
         }
         #endregion

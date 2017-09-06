@@ -16,7 +16,7 @@ namespace Genitock.Genotick
         /// <summary>
         /// contain the absolute data directory name
         /// </summary>
-        public static String FullDataDirectory { get; private set; }
+        public static String FullNameDataDirectory { get; private set; }
 
         /// <summary>
         /// contain only the the name of the data directory
@@ -28,7 +28,7 @@ namespace Genitock.Genotick
             get
             {
                 //todo parametrize this folder
-                return Path.Combine(FullDataDirectory, "Backup");
+                return Path.Combine(FullNameDataDirectory, "Backup");
             }
         }
         /// <summary>
@@ -85,6 +85,11 @@ namespace Genitock.Genotick
         internal static String _GenotikPath;
 
         /// <summary>
+        /// This is how far into the past a robot can read data.
+        /// </summary>
+        internal static Int32 dataMaximumOffset;
+
+        /// <summary>
         /// all config line
         /// </summary>
         private static List<String> configContent;
@@ -102,14 +107,14 @@ namespace Genitock.Genotick
             _GenotikPath = Genotickpath;
             configContent = File.ReadAllLines(configfilepath).ToList();
             DataDirectory = configContent.First(p => p.StartsWith("dataDirectory")).Substring(13).Trim();
-            FullDataDirectory = Path.Combine(Genotickpath,DataDirectory);
-
+            FullNameDataDirectory = Path.Combine(Genotickpath,DataDirectory);
+            dataMaximumOffset = Convert.ToInt32(configContent.First(p => p.StartsWith("dataMaximumOffset")).Substring(17).Trim());
             if (!Directory.Exists(DataBackupDirectory))
                 Directory.CreateDirectory(DataBackupDirectory);
 
             //store all normal file in the same variable and all reverse in another one in a dictionnary with the par as key
             //all file which are not started with reverse are the original file
-            foreach (var p in (Directory.GetFiles(FullDataDirectory).ToList().Where(p => !p.Contains("reverse"))))
+            foreach (var p in (Directory.GetFiles(FullNameDataDirectory).ToList().Where(p => !p.Contains("reverse"))))
             {
                 CurrenciesDataFileName.Add((Pair)Enum.Parse(typeof(Pair), p.Substring(0, p.IndexOf('.')).Substring(p.LastIndexOf('\\') + 1)));
             }
