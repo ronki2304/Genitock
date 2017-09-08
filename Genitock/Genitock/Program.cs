@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using Genitock.Interface;
 
 namespace Genitock
 { 
@@ -15,6 +16,10 @@ namespace Genitock
 
         static void Main(string[] args)
         {
+            PoloniexWrapper pw = new PoloniexWrapper();
+            Console.WriteLine(pw.ReturnBalance(Currencies.BTC));
+            pw.Sell(Pair.BTC_BCH, 0.14446019, 0.01197986);
+            return;
             String mode = String.Empty;
             try
             {
@@ -102,9 +107,9 @@ namespace Genitock
 
         private static void ExportData(Pair pair, DateTime dtstart, DateTime dtstop, Period period, String ExportPath)
         {
-            PoloniexWrapper wrapper = new PoloniexWrapper();
 
-            var chart = wrapper.GetChartData(pair, dtstart, dtstop, period);
+            PoloniexWrapper pw = new PoloniexWrapper();
+            var chart = pw.GetChartData(pair, dtstart, dtstop, period);
 
             //write the file
             InputData.WriteToCSVFile(chart, ExportPath);
@@ -129,18 +134,15 @@ namespace Genitock
 
             //backup data
             InputData.BackupData();
-            
-            
-            //update all CSV
-            PoloniexWrapper wrapper = new PoloniexWrapper();
 
 
+            IBroker pw = new PoloniexWrapper();
             foreach (Pair pair in GenotickConfig.CurrenciesDataFileName)
             {
                 //getting the last data
                 //for moment assume that all csv have the same date
                 //retrieve missing candle
-                var chart = wrapper.GetChartData(pair, GenotickConfig.StartingPoint, DateTime.MaxValue, GenotickConfig.PoloniexPeriod);
+                var chart = pw.GetChartData(pair, GenotickConfig.StartingPoint, DateTime.MaxValue, GenotickConfig.PoloniexPeriod);
 
                 InputData.AppendChartDataFile(chart);
             }
