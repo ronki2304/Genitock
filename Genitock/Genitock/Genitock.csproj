@@ -88,8 +88,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Entity\Chart.cs" />
-    <Compile Include="Entity\Poloniex\Balance.cs" />
+    <Compile Include="Entity\Poloniex\Chart.cs" />
+    <Compile Include="Entity\Poloniex\Market\TradeDone.cs" />
+    <Compile Include="Poloniex\JSON\RawMarketOrderBook.cs" />
+    <Compile Include="Entity\Poloniex\Market\MarketOrder.cs" />
+    <Compile Include="Entity\Poloniex\Wallet.cs" />
+    <Compile Include="Entity\Poloniex\Market\MarketOrderBook.cs" />
     <Compile Include="Genotick\GenotickConfig.cs" />
     <Compile Include="Entity\Poloniex\Enum.cs" />
     <Compile Include="Extension\MethodAdd.cs" />

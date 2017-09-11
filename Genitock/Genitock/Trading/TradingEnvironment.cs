@@ -1,4 +1,5 @@
 ﻿using Genitock.Entity.Poloniex;
+using Genitock.Entity.Poloniex.Market;
 using Genitock.Interface;
 using System;
 using System.Collections.Generic;
@@ -25,11 +26,13 @@ namespace Genitock.Trading
         /// </summary>
         public static Pair TradedPair { get { return _TradedPair; } }
 
+        public IBroker _broker;
  
         private static Pair _TradedPair;
         public TradingEnvironment(IBroker broker)
         {
             Boolean success;
+            _broker = broker;
 
             success = Enum.TryParse<Pair>(ConfigurationManager.AppSettings["Trading_Pair"], out _TradedPair);
             if (!success)
@@ -40,19 +43,35 @@ namespace Genitock.Trading
 
      
             SourceWallet = new Wallet { currency = (Currencies)Enum.Parse(typeof(Currencies), _TradedPair.ToString().Split('_')[0]) };
-            SourceWallet.amount = broker.ReturnBalance(SourceWallet.currency);
+            SourceWallet.amount = _broker.ReturnBalance(SourceWallet.currency);
 
-            TargetWallet = new Wallet { currency = (Currencies)Enum.Parse(typeof(Currencies), _TradedPair.ToString().Split('_')[0]) };
-            TargetWallet.amount = broker.ReturnBalance(TargetWallet.currency);
+            TargetWallet = new Wallet { currency = (Currencies)Enum.Parse(typeof(Currencies), _TradedPair.ToString().Split('_')[1]) };
+            TargetWallet.amount = _broker.ReturnBalance(TargetWallet.currency);
         }
 
-        public Boolean buy()
+        public Boolean Buy()
         {
-            return false;
+            MarketOrderBook ob= _broker.returnMarketOrderBook(_TradedPair,20);
+            Double amount = SourceWallet.amount;
+            
+            while (amount> Convert.ToDouble(ConfigurationManager.AppSettings["Minimum_trade"]))
+            {
+                TradeDone order = _broker.Buy(_TradedPair, ob.GetTheNextAsks().rate, amount);
+                amount = amount - order.totalAmountDoneSourceCurrency;
+            }
+                return false;
         }
 
         public Boolean Sell()
         {
+            MarketOrderBook ob = _broker.returnMarketOrderBook(_TradedPair, 20);
+            Double amount = TargetWallet.amount;
+
+            while (amount > Convert.ToDouble(ConfigurationManager.AppSettings["Minimum_trade"]))
+            {
+                TradeDone order = _broker.Sell(_TradedPair, ob.GetTheNextBids().rate, amount);
+                amount = amount - order.totalAmountDoneTargetCurrency;
+            }
             return false;
         }
     }

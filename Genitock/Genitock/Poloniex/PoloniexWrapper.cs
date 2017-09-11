@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 using Genitock.Extension;
 using Genitock.Interface;
 using System.IO;
+using Genitock.Entity.Poloniex.Market;
+using Genitock.Entity.Poloniex.JSON;
 
 namespace Genitock.Poloniex
 {
@@ -21,20 +23,27 @@ namespace Genitock.Poloniex
         readonly String ApiKey = ConfigurationManager.AppSettings["api"].ToString();
         readonly String secretKey = ConfigurationManager.AppSettings["secret"].ToString();
         /// <summary>
+        /// if dry run is enable do not trade on market
+        /// </summary>
+        readonly Boolean DryRun = Convert.ToBoolean(ConfigurationManager.AppSettings["DryRun"]);
+        /// <summary>
         /// 0 paire
         /// 1 tick debut
         /// 2 tick fin
         /// 4 periode
         /// </summary>
-        readonly String GetUrl = "https://poloniex.com/public?command=returnChartData&currencyPair={0}&start={1}&end={2}&period={3}";
+        readonly String GetUrl = "https://poloniex.com/public?command=";
 
         /// <summary>
         /// Post url to manage Poloniex account
         /// </summary>
         String PostUrl = "https://poloniex.com/tradingApi";
+
+
+        #region HTTP GET
         public Chart GetChartData(Pair pair, DateTime dtStart, DateTime dtEnd, Period period)
         {
-            String url = String.Format(GetUrl
+            String url = String.Format(GetUrl + "returnChartData&currencyPair={0}&start={1}&end={2}&period={3}"
                 , pair
                 , dtStart.getUnixTime()
                 , dtEnd.getUnixTime()
@@ -48,6 +57,31 @@ namespace Genitock.Poloniex
             return tickings;
 
         }
+
+        public MarketOrderBook returnMarketOrderBook(Pair pair, Int32 depth)
+        {
+            String url = String.Concat(GetUrl
+                , "returnOrderBook&currencyPair="
+                , pair.ToString()
+                , "&depth="
+                , depth);
+
+            WebClient client = new WebClient();
+
+            var content = client.DownloadString(url);
+            RawMarketOrderBook rMarketBook = JsonConvert.DeserializeObject<RawMarketOrderBook>(content);
+
+            return new MarketOrderBook(rMarketBook, pair);
+        }
+
+        #endregion
+
+        #region HTTP POST
+        /// <summary>
+        /// return the amount available in a specific currency
+        /// </summary>
+        /// <param name="currency"></param>
+        /// <returns></returns>
         public Double ReturnBalance(Currencies currency)
         {
             WebClient client = new WebClient();
@@ -64,6 +98,8 @@ namespace Genitock.Poloniex
 
         }
 
+
+
         private void EncryptPost(WebClient client, string PostData)
         {
             var keyByte = Encoding.UTF8.GetBytes(secretKey);
@@ -74,7 +110,14 @@ namespace Genitock.Poloniex
             }
         }
 
-        public Int32 Sell(Pair pair, Double rate, Double amount)
+        /// <summary>
+        /// Sell the targeted currency to the original one
+        /// </summary>
+        /// <param name="pair">the target pair</param>
+        /// <param name="rate">the price in the original currency</param>
+        /// <param name="amount">the amount in the destination currency</param>
+        /// <returns></returns>
+        public TradeDone Sell(Pair pair, Double rate, Double amount)
         {
             WebClient client = new WebClient();
             client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
@@ -83,17 +126,64 @@ namespace Genitock.Poloniex
             String PostData = String.Concat("command=sell&nonce=", DateTime.Now.getUnixTime()
             , "&currencyPair=", pair.ToString()
             , "&rate=", String.Format(CultureInfo.InvariantCulture, "{0:F20}", rate).TrimEnd('0')
-            , "&amount=", String.Format(CultureInfo.InvariantCulture, "{0:F20}", amount).TrimEnd('0') );
+            , "&amount=", String.Format(CultureInfo.InvariantCulture, "{0:F20}", amount).TrimEnd('0')
+            , "&immediateorcancel=1");
+
+            EncryptPost(client, PostData);
+            if (!DryRun)
+            {
+                String content = client.UploadString(PostUrl, "POST", PostData);
+                return JsonConvert.DeserializeObject<TradeDone>(content);
+            }
+            else
+            {
+                TradeDone fake = new TradeDone();
+                fake.orderNumber = "1";
+                fake.resultingTrades = new List<ResultingTrade>();
+                fake.resultingTrades.Add(new ResultingTrade { amount = amount, rate = rate, date = DateTime.Now, type = "sell" });
+                return fake;
+            }
+        }
+
+        /// <summary>
+        /// Buy on market exchange
+        /// </summary>
+        /// <param name="pair">the target pair</param>
+        /// <param name="rate">the price in the original currency</param>
+        /// <param name="amount">the amount in the original currency</param>
+        /// <returns></returns>
+        public TradeDone Buy(Pair pair, Double rate, Double Initialamount)
+        {
+            //convert to the target currency because this is amount required in target currency for all exchange
+            Double amount = Initialamount / rate;
+            WebClient client = new WebClient();
+            client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+            client.Headers["key"] = ApiKey;
+
+            String PostData = String.Concat("command=buy&nonce=", DateTime.Now.getUnixTime()
+            , "&currencyPair=", pair.ToString()
+            , "&rate=", String.Format(CultureInfo.InvariantCulture, "{0:F20}", rate).TrimEnd('0')
+            , "&amount=", String.Format(CultureInfo.InvariantCulture, "{0:F20}", amount).TrimEnd('0')
+             , "&immediateorcancel=1");
 
             EncryptPost(client, PostData);
 
-            String content = client.UploadString(PostUrl, "POST", PostData);
-            Console.WriteLine(content);
-            File.WriteAllText("titi.txt", content);
-            return 0;
+            if (!DryRun)
+            {
+                String content = client.UploadString(PostUrl, "POST", PostData);
+                return JsonConvert.DeserializeObject<TradeDone>(content); 
+            }
+            else
+            {
+                TradeDone fake = new TradeDone();
+                fake.orderNumber = "1";
+                fake.resultingTrades = new List<ResultingTrade>();
+                fake.resultingTrades.Add(new ResultingTrade { amount = amount, rate = rate, date = DateTime.Now, type="buy" });
+                return fake;
+            }
 
         }
-
+        #endregion
     }
 }
 

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Genitock.Entity
+namespace Genitock.Entity.Poloniex
 { 
    public  class Chart
     { 

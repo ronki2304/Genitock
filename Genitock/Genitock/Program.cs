@@ -7,6 +7,8 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using Genitock.Interface;
+using Newtonsoft.Json;
+using Genitock.Entity.Poloniex.Market;
 
 namespace Genitock
 { 
@@ -16,10 +18,7 @@ namespace Genitock
 
         static void Main(string[] args)
         {
-            PoloniexWrapper pw = new PoloniexWrapper();
-            Console.WriteLine(pw.ReturnBalance(Currencies.BTC));
-            pw.Sell(Pair.BTC_BCH, 0.14446019, 0.01197986);
-            return;
+
             String mode = String.Empty;
             try
             {
@@ -117,6 +116,12 @@ namespace Genitock
 
         static void runtime()
         {
+           
+            PoloniexWrapper pw1 = new PoloniexWrapper();
+            Trading.TradingEnvironment te= new Trading.TradingEnvironment(pw1);
+            te.Buy();
+
+            return;
             //load config file
                 String sconfigfilePath = Path.Combine(ConfigurationManager.AppSettings["genotick_Path"]
                     , ConfigurationManager.AppSettings["genotick_configfileName"]);
