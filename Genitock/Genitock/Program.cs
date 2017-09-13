@@ -104,6 +104,14 @@ namespace Genitock
             }
         }
 
+        /// <summary>
+        /// Export data for genotick training
+        /// </summary>
+        /// <param name="pair">Pair.</param>
+        /// <param name="dtstart">Dtstart.</param>
+        /// <param name="dtstop">Dtstop.</param>
+        /// <param name="period">Period.</param>
+        /// <param name="ExportPath">Export path.</param>
         private static void ExportData(Pair pair, DateTime dtstart, DateTime dtstop, Period period, String ExportPath)
         {
 
@@ -120,6 +128,8 @@ namespace Genitock
             PoloniexWrapper pw1 = new PoloniexWrapper();
             Trading.TradingEnvironment te= new Trading.TradingEnvironment(pw1);
             te.Buy();
+            Console.WriteLine("ca marche");
+            Console.ReadLine();
 
             return;
             //load config file
