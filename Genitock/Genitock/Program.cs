@@ -10,6 +10,7 @@ using Genitock.Interface;
 using Newtonsoft.Json;
 using Genitock.Entity.Poloniex.Market;
 
+
 namespace Genitock
 { 
     class Program
