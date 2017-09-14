@@ -3,6 +3,7 @@ using Genitock.Delegate;
 using System.Threading.Tasks;
 using Genitock.Entity.Poloniex;
 using WampSharp.V2;
+using System.Configuration;
 
 namespace Genitock.Poloniex.Live
 {
@@ -24,7 +25,7 @@ namespace Genitock.Poloniex.Live
 				{
 					var currencyPair = evt.Arguments[0].Deserialize<string>();
 					var last = evt.Arguments[1].Deserialize<decimal>();
-					if (currencyPair == "BTC_ETH")
+                    if (currencyPair == ConfigurationManager.AppSettings["Trading_Pair"])
 					{
 						//Console.WriteLine($"Currencypair: {currencyPair}, Last: {last}, Date: {DateTime.Now}");
 						onTick(null, new PoloniexArg(currencyPair, last));

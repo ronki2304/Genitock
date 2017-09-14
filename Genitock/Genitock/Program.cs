@@ -128,7 +128,7 @@ namespace Genitock
            
             PoloniexWrapper pw1 = new PoloniexWrapper();
             Trading.TradingEnvironment te= new Trading.TradingEnvironment(pw1);
-            te.Buy();
+            te.Buy(); 
             Console.WriteLine("ca marche");
             Console.ReadLine();
 

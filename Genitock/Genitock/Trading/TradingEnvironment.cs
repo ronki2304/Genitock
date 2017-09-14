@@ -7,6 +7,7 @@ using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Genitock.Poloniex.Live;
 
 namespace Genitock.Trading
 {
@@ -16,6 +17,11 @@ namespace Genitock.Trading
     /// </summary>
     public class TradingEnvironment
     {
+        void Ticker_OnTick(object source, Entity.Poloniex.PoloniexArg e)
+        {
+            Console.WriteLine($"Date {DateTime.Now} Pair {e.Pair} Rate {e.Rate}");
+        }
+
         /// <summary>
         /// return the wallet which will be used for trading
         /// </summary>
@@ -59,6 +65,7 @@ namespace Genitock.Trading
                 TradeDone order = _broker.Buy(_TradedPair, ob.GetTheNextAsks().rate, amount);
                 amount = amount - order.totalAmountDoneSourceCurrency;
             }
+            Ticker.onTick+= Ticker_OnTick;
                 return false;
         }
 
