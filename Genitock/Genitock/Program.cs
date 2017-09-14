@@ -9,7 +9,8 @@ using System.Linq;
 using Genitock.Interface;
 using Newtonsoft.Json;
 using Genitock.Entity.Poloniex.Market;
-
+using Genitock.Poloniex.Live;
+using System.Threading;
 
 namespace Genitock
 { 
@@ -126,9 +127,7 @@ namespace Genitock
         static void runtime()
         {
            
-            PoloniexWrapper pw1 = new PoloniexWrapper();
-            Trading.TradingEnvironment te= new Trading.TradingEnvironment(pw1);
-            te.Buy(); 
+            Ticker.onTick+= (source, e) => { Console.WriteLine($"{e.Rate}");};
             Console.WriteLine("ca marche");
             Console.ReadLine();
 

@@ -65,7 +65,7 @@ namespace Genitock.Trading
                 TradeDone order = _broker.Buy(_TradedPair, ob.GetTheNextAsks().rate, amount);
                 amount = amount - order.totalAmountDoneSourceCurrency;
             }
-            Ticker.onTick+= Ticker_OnTick;
+           // Ticker.onTick+= Ticker_OnTick;
                 return false;
         }
 
