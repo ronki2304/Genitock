@@ -20,6 +20,9 @@ namespace Genitock.Trading
         void WatchStopLimit(object source, Entity.Poloniex.PoloniexArg e)
         {
             Console.WriteLine($"Date {DateTime.Now} Pair {e.Pair} Rate {e.Rate}");
+            Console.WriteLine($"Stop loss rate : {StopLimitrate}");
+            if (e.Rate < StopLimitrate)
+                Sell();
         }
 
         /// <summary>
@@ -98,7 +101,7 @@ namespace Genitock.Trading
 
             //compute the average rate to determine the stop limit
             StopLimitrate = allorders.AverageRate * Convert.ToDouble(ConfigurationManager.AppSettings["StopLoss"]);
-            Console.WriteLine($"buy done average rate {StopLimitrate}");
+            Console.WriteLine($"buy done stop limit rate {StopLimitrate}");
             Ticker.onTick+= WatchStopLimit;
             state = TradingStatus.InMarket;
             RefreshWallet();

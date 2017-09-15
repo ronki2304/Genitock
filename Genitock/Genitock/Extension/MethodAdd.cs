@@ -10,9 +10,9 @@ namespace Genitock.Extension
 {
     public static class Methodextension
     {
-        public static Int64 getUnixTime(this DateTime dt)
+        public static Int64 getUnixMilliTime(this DateTime dt)
         {
-            return (Int64)(dt - new DateTime(1970, 1, 1)).TotalSeconds;
+            return (Int64)(dt - new DateTime(1970, 1, 1)).TotalMilliseconds;
         }
 
      

@@ -57,7 +57,7 @@ namespace Genitock.Poloniex.Live
                 IDisposable subscription = tickerSubject.Subscribe(evt =>
                 {
                     var currencyPair = evt.Arguments[0].Deserialize<string>();
-                    var last = evt.Arguments[1].Deserialize<decimal>();
+                    var last = evt.Arguments[1].Deserialize<Double>();
                     if (currencyPair == pair.ToString())
                     {
                         LastTickReceived = DateTime.Now;
@@ -91,7 +91,7 @@ namespace Genitock.Poloniex.Live
             {
                 PoloniexWrapper pw = new PoloniexWrapper();
 
-                onTick(null, new PoloniexArg("manual", Convert.ToDecimal(pw.EstimatedLastRate(pair))));
+                onTick(null, new PoloniexArg("manual", pw.EstimatedLastRate(pair)));
             }
         }
 

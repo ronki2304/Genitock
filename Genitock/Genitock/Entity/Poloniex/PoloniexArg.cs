@@ -4,8 +4,8 @@ namespace Genitock.Entity.Poloniex
     public class PoloniexArg
     {
 		public String Pair { get; set; }
-		public Decimal Rate { get; set; }
-		public PoloniexArg(String pair, Decimal rate)
+		public Double Rate { get; set; }
+		public PoloniexArg(String pair, Double rate)
 		{
 			Pair = pair;
 			Rate = rate;

@@ -45,8 +45,8 @@ namespace Genitock.Poloniex
         {
             String url = String.Format(GetUrl + "returnChartData&currencyPair={0}&start={1}&end={2}&period={3}"
                 , pair
-                , dtStart.getUnixTime()
-                , dtEnd.getUnixTime()
+                , dtStart.getUnixMilliTime()
+                , dtEnd.getUnixMilliTime()
                 , (int)period);
             WebClient client = new WebClient();
 
@@ -91,7 +91,7 @@ namespace Genitock.Poloniex
             client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
             client.Headers["key"] = ApiKey;
 
-            String PostData = "command=returnBalances&nonce=" + DateTime.Now.getUnixTime();
+            String PostData = "command=returnBalances&nonce=" + DateTime.Now.getUnixMilliTime();
             EncryptPost(client, PostData);
             String content = client.UploadString(PostUrl, "POST", PostData);
 
@@ -126,7 +126,7 @@ namespace Genitock.Poloniex
             client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
             client.Headers["key"] = ApiKey;
 
-            String PostData = String.Concat("command=sell&nonce=", DateTime.Now.getUnixTime()
+            String PostData = String.Concat("command=sell&nonce=", DateTime.Now.getUnixMilliTime()
             , "&currencyPair=", pair.ToString()
             , "&rate=", String.Format(CultureInfo.InvariantCulture, "{0:F20}", rate).TrimEnd('0')
             , "&amount=", String.Format(CultureInfo.InvariantCulture, "{0:F20}", amount).TrimEnd('0')
@@ -163,7 +163,7 @@ namespace Genitock.Poloniex
             client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
             client.Headers["key"] = ApiKey;
 
-            String PostData = String.Concat("command=buy&nonce=", DateTime.Now.getUnixTime()
+            String PostData = String.Concat("command=buy&nonce=", DateTime.Now.getUnixMilliTime()
             , "&currencyPair=", pair.ToString()
             , "&rate=", String.Format(CultureInfo.InvariantCulture, "{0:F20}", rate).TrimEnd('0')
             , "&amount=", String.Format(CultureInfo.InvariantCulture, "{0:F20}", amount).TrimEnd('0')
@@ -192,7 +192,7 @@ namespace Genitock.Poloniex
 			WebClient client = new WebClient();
 			client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
 			client.Headers["key"] = ApiKey;
-            String Postdata = $"command=cancelOrder&nonce={DateTime.Now.getUnixTime()}&orderNumber={OrderNumber}";
+            String Postdata = $"command=cancelOrder&nonce={DateTime.Now.getUnixMilliTime()}&orderNumber={OrderNumber}";
 			
             EncryptPost(client, Postdata);
 			if (!DryRun)

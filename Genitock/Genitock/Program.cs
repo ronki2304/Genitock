@@ -36,7 +36,8 @@ namespace Genitock
                 return;
             }
 
-			//for the moment only poloniex but may add a new provider
+            //for the moment only poloniex but may add a new provider
+            Console.WriteLine("Poloniex choosen");
 			IBroker pw = new PoloniexWrapper();
 			trading = new TradingEnvironment(pw);
 
@@ -136,8 +137,9 @@ namespace Genitock
             //Ticker.onTick+= (source, e) => { Console.WriteLine($"{e.Rate}");};
             //Console.WriteLine("ca marche");
             //Console.ReadLine();
-
-            //return;
+            //trading.Buy();
+            Console.ReadLine();
+            return;
 
             //load config file
                 String sconfigfilePath = Path.Combine(ConfigurationManager.AppSettings["genotick_Path"]
