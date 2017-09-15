@@ -57,7 +57,10 @@ namespace Genitock.Poloniex
             return tickings;
 
         }
-
+        public Double EstimatedLastRate(Pair pair)
+        {
+            return returnMarketOrderBook(pair, 1).Bids.First().rate;
+        }
         public MarketOrderBook returnMarketOrderBook(Pair pair, Int32 depth)
         {
             String url = String.Concat(GetUrl
