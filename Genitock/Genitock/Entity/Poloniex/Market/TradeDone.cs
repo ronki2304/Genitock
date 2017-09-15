@@ -39,5 +39,12 @@ namespace Genitock.Entity.Poloniex.Market
                 return resultingTrades.Sum(p => p.amount*p.rate);
             }
         }
+
+        public Double AverageRate
+        {
+            get{
+                return resultingTrades.Sum(p => p.amount * p.rate) / resultingTrades.Sum(p => p.amount);
+            }
+        }
     }
 }

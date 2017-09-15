@@ -11,13 +11,14 @@ using Newtonsoft.Json;
 using Genitock.Entity.Poloniex.Market;
 using Genitock.Poloniex.Live;
 using System.Threading;
+using Genitock.Trading;
 
 namespace Genitock
 { 
     class Program
     {
         const String WAMPURL = "wss://api.poloniex.com";
-
+        static TradingEnvironment trading;
         static void Main(string[] args)
         {
 
@@ -34,6 +35,11 @@ namespace Genitock
                 Console.WriteLine("LIVE for trading");
                 return;
             }
+
+			//for the moment only poloniex but may add a new provider
+			IBroker pw = new PoloniexWrapper();
+			trading = new TradingEnvironment(pw);
+
             if (mode == "CSV")
             {
                 //example : mode=CSV dtStart=01/01/1970 dtEnd=01/01/2090 Period=m5 Pair=BTC_ETH ExportPath=c:\temp
@@ -101,7 +107,9 @@ namespace Genitock
 
             if (mode=="LIVE")
             {
-                runtime();
+				//TODO need to set the timer
+				//TODO need to synchronize before
+				runtime();
 
             }
         }
@@ -116,9 +124,7 @@ namespace Genitock
         /// <param name="ExportPath">Export path.</param>
         private static void ExportData(Pair pair, DateTime dtstart, DateTime dtstop, Period period, String ExportPath)
         {
-
-            PoloniexWrapper pw = new PoloniexWrapper();
-            var chart = pw.GetChartData(pair, dtstart, dtstop, period);
+            var chart = trading.GetChartData(pair, dtstart, dtstop, period);
 
             //write the file
             InputData.WriteToCSVFile(chart, ExportPath);
@@ -126,12 +132,13 @@ namespace Genitock
 
         static void runtime()
         {
-           
-            Ticker.onTick+= (source, e) => { Console.WriteLine($"{e.Rate}");};
-            Console.WriteLine("ca marche");
-            Console.ReadLine();
+           //TODO check if it is in order
+            //Ticker.onTick+= (source, e) => { Console.WriteLine($"{e.Rate}");};
+            //Console.WriteLine("ca marche");
+            //Console.ReadLine();
 
-            return;
+            //return;
+
             //load config file
                 String sconfigfilePath = Path.Combine(ConfigurationManager.AppSettings["genotick_Path"]
                     , ConfigurationManager.AppSettings["genotick_configfileName"]);
@@ -151,13 +158,13 @@ namespace Genitock
             InputData.BackupData();
 
 
-            IBroker pw = new PoloniexWrapper();
+
             foreach (Pair pair in GenotickConfig.CurrenciesDataFileName)
             {
                 //getting the last data
                 //for moment assume that all csv have the same date
                 //retrieve missing candle
-                var chart = pw.GetChartData(pair, GenotickConfig.StartingPoint, DateTime.MaxValue, GenotickConfig.PoloniexPeriod);
+                var chart = trading.GetChartData(pair, GenotickConfig.StartingPoint, DateTime.MaxValue, GenotickConfig.PoloniexPeriod);
 
                 InputData.AppendChartDataFile(chart);
             }
@@ -167,11 +174,16 @@ namespace Genitock
             //update genotick config file
             GenotickConfig.SaveConfig();
             //call genotick to analyze
-            Console.WriteLine(GenotickExec.SetPrediction());
-            Console.ReadLine();
-            //positionner les ordres sur le marché
-            //positionner une limite
-            //cloture la position au bout de 5 minutes
+            var operation =GenotickExec.SetPrediction();
+
+
+
+
+            if (operation == Operation.buy && trading.SourceWallet.amount >Convert.ToDouble(ConfigurationManager.AppSettings["Minimum_trade"]))
+                trading.Buy();
+            if (operation== Operation.sell && trading.TargetWallet.amount > Convert.ToDouble(ConfigurationManager.AppSettings["Minimum_trade"]))
+                trading.Sell();
+            
         }
     }
 }

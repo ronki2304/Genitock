@@ -17,7 +17,7 @@ namespace Genitock.Trading
     /// </summary>
     public class TradingEnvironment
     {
-        void Ticker_OnTick(object source, Entity.Poloniex.PoloniexArg e)
+        void WatchStopLimit(object source, Entity.Poloniex.PoloniexArg e)
         {
             Console.WriteLine($"Date {DateTime.Now} Pair {e.Pair} Rate {e.Rate}");
         }
@@ -25,16 +25,25 @@ namespace Genitock.Trading
         /// <summary>
         /// return the wallet which will be used for trading
         /// </summary>
-        public static Wallet SourceWallet { get; private set; }
-        public static Wallet TargetWallet { get; private set; }
+        public Wallet SourceWallet { get; private set; }
+        public Wallet TargetWallet { get; private set; }
+        public TradingStatus state { get; private set; }
         /// <summary>
         /// return the target pair for trading
         /// </summary>
-        public static Pair TradedPair { get { return _TradedPair; } }
+        public Pair TradedPair { get { return _TradedPair; } }
 
         public IBroker _broker;
  
-        private static Pair _TradedPair;
+        private Pair _TradedPair;
+
+        /// <summary>
+        /// store the stop limit rate from buy action
+        /// </summary>
+        private static Double StopLimitrate;
+
+        private TradingData tradersetup;
+
         public TradingEnvironment(IBroker broker)
         {
             Boolean success;
@@ -47,7 +56,12 @@ namespace Genitock.Trading
                 Environment.Exit(0);
             }
 
-     
+            RefreshWallet();
+            state = SourceWallet.amount > TargetWallet.amount ? TradingStatus.OutMarket:TradingStatus.InMarket;
+        }
+
+        private void RefreshWallet()
+        {
             SourceWallet = new Wallet { currency = (Currencies)Enum.Parse(typeof(Currencies), _TradedPair.ToString().Split('_')[0]) };
             SourceWallet.amount = _broker.ReturnBalance(SourceWallet.currency);
 
@@ -55,31 +69,74 @@ namespace Genitock.Trading
             TargetWallet.amount = _broker.ReturnBalance(TargetWallet.currency);
         }
 
-        public Boolean Buy()
+        public void Buy()
         {
+            Console.WriteLine("Init buy process");
             MarketOrderBook ob= _broker.returnMarketOrderBook(_TradedPair,20);
             Double amount = SourceWallet.amount;
-            
+
+            TradeDone allorders = new TradeDone();
+            allorders.resultingTrades = new List<ResultingTrade>();
+
             while (amount> Convert.ToDouble(ConfigurationManager.AppSettings["Minimum_trade"]))
             {
                 TradeDone order = _broker.Buy(_TradedPair, ob.GetTheNextAsks().rate, amount);
+                if (order.resultingTrades.Count()==0)
+                {
+                    Boolean cleanSituation = false;
+                    Console.WriteLine("order not executed. clean it");
+                    //need to cancel order to rate to high
+                    while (!cleanSituation)
+                        cleanSituation=_broker.CancelOrder(order.orderNumber);
+                    //restart the process
+                    Console.WriteLine("clean complete continue buy process");
+                    continue;
+                }
                 amount = amount - order.totalAmountDoneSourceCurrency;
+                allorders.resultingTrades.AddRange(order.resultingTrades);
             }
-           // Ticker.onTick+= Ticker_OnTick;
-                return false;
+
+            //compute the average rate to determine the stop limit
+            StopLimitrate = allorders.AverageRate * Convert.ToDouble(ConfigurationManager.AppSettings["StopLoss"]);
+            Console.WriteLine($"buy done average rate {StopLimitrate}");
+            Ticker.onTick+= WatchStopLimit;
+            state = TradingStatus.InMarket;
+            RefreshWallet();
+                
         }
 
-        public Boolean Sell()
+        public void Sell()
         {
+            Console.WriteLine("Init sell process");
             MarketOrderBook ob = _broker.returnMarketOrderBook(_TradedPair, 20);
             Double amount = TargetWallet.amount;
 
             while (amount > Convert.ToDouble(ConfigurationManager.AppSettings["Minimum_trade"]))
             {
                 TradeDone order = _broker.Sell(_TradedPair, ob.GetTheNextBids().rate, amount);
+				if (order.resultingTrades.Count() == 0)
+				{
+					Boolean cleanSituation = false;
+					Console.WriteLine("order not executed. clean it");
+					//need to cancel order to rate to high
+					while (!cleanSituation)
+						cleanSituation = _broker.CancelOrder(order.orderNumber);
+					//restart the process
+					Console.WriteLine("clean complete continue sell process");
+					continue;
+				}
+
                 amount = amount - order.totalAmountDoneTargetCurrency;
             }
-            return false;
+            Console.WriteLine("disable ticker action");
+            Ticker.onTick -= WatchStopLimit;
+			RefreshWallet();
+            state = TradingStatus.OutMarket;
+        }
+
+        public Chart GetChartData(Pair pair, DateTime dtStart, DateTime dtEnd, Period period)
+        {
+            return _broker.GetChartData(pair,dtStart,dtEnd,period);
         }
     }
 }

@@ -135,6 +135,7 @@
     <Compile Include="Entity\Poloniex\PoloniexArg.cs" />
     <Compile Include="Delegate\delegate.cs" />
     <Compile Include="Poloniex\Live\Ticker.cs" />
+    <Compile Include="Trading\TradingData.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

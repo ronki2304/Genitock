@@ -125,6 +125,12 @@ namespace Genitock.Entity.Poloniex
         Out
     }
 
+    public enum TradingStatus
+    {
+        InMarket,
+        OutMarket
+    }
+
     /// <summary>
     /// list of available currencies
     /// </summary>

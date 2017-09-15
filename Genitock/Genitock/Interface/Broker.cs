@@ -22,5 +22,8 @@ namespace Genitock.Interface
 
         TradeDone Buy (Pair pair, Double rate, Double amount);
 
+        Boolean CancelOrder(String OrderNumber);
+
+
     }
 }

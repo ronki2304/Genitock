@@ -186,6 +186,26 @@ namespace Genitock.Poloniex
             }
 
         }
+
+        public Boolean CancelOrder(String OrderNumber)
+        {
+			WebClient client = new WebClient();
+			client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+			client.Headers["key"] = ApiKey;
+            String Postdata = $"command=cancelOrder&nonce={DateTime.Now.getUnixTime()}&orderNumber={OrderNumber}";
+			
+            EncryptPost(client, Postdata);
+			if (!DryRun)
+			{
+				String content = client.UploadString(PostUrl, "POST", Postdata);
+                return content.Equals("{ \"success\":1}");
+			}
+			else
+            {
+                return true;
+            }
+
+        }
         #endregion
     }
 }
