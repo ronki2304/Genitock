@@ -17,13 +17,9 @@ namespace Genitock.Trading
     /// </summary>
     public class TradingEnvironment
     {
-        void WatchStopLimit(object source, Entity.Poloniex.PoloniexArg e)
-        {
-            Console.WriteLine($"Date {DateTime.Now} Pair {e.Pair} Rate {e.Rate}");
-            Console.WriteLine($"Stop loss rate : {StopLimitrate}");
-            if (e.Rate < StopLimitrate)
-                Sell();
-        }
+
+        private TradingContext context; 
+      
 
         /// <summary>
         /// return the wallet which will be used for trading
@@ -45,10 +41,9 @@ namespace Genitock.Trading
         /// </summary>
         private static Double StopLimitrate;
 
-        private TradingData tradersetup;
-
         public TradingEnvironment(IBroker broker)
         {
+            
             Boolean success;
             _broker = broker;
 
@@ -61,6 +56,7 @@ namespace Genitock.Trading
 
             RefreshWallet();
             state = SourceWallet.amount > TargetWallet.amount ? TradingStatus.OutMarket:TradingStatus.InMarket;
+            context = new TradingContext();
         }
 
         private void RefreshWallet()
@@ -141,5 +137,18 @@ namespace Genitock.Trading
         {
             return _broker.GetChartData(pair,dtStart,dtEnd,period);
         }
+
+        /// <summary>
+        /// check if the stop limit is raised
+        /// </summary>
+        /// <param name="source">Source.</param>
+        /// <param name="e">E.</param>
+		void WatchStopLimit(object source, Entity.Poloniex.PoloniexArg e)
+		{
+			Console.WriteLine($"Date {DateTime.Now} Pair {e.Pair} Rate {e.Rate}");
+			Console.WriteLine($"Stop loss rate : {StopLimitrate}");
+			if (e.Rate < StopLimitrate)
+				Sell();
+		}
     }
 }

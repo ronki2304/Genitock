@@ -7,12 +7,10 @@ namespace Genitock.Trading
     /// this class is only used by tradingenvironement
     /// </summary>
 
-    internal class TradingData
+    class TradingContext
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:Genitock.Trading.TradingData"/> class.
-        /// </summary>
-         TradingData()
+        
+         public  TradingContext()
         {
             //read data from config file
         }
