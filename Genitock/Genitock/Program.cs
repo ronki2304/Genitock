@@ -12,6 +12,7 @@ using Genitock.Entity.Poloniex.Market;
 using Genitock.Poloniex.Live;
 using System.Threading;
 using Genitock.Trading;
+using System.Xml.Serialization;
 
 namespace Genitock
 { 
@@ -21,7 +22,6 @@ namespace Genitock
         static TradingEnvironment trading;
         static void Main(string[] args)
         {
-
             String mode = String.Empty;
             try
             {
@@ -39,7 +39,8 @@ namespace Genitock
             //for the moment only poloniex but may add a new provider
             Console.WriteLine("Poloniex choosen");
 			IBroker pw = new PoloniexWrapper();
-			trading = new TradingEnvironment(pw);
+            ITicker it = new PoloniexTicker();
+            trading = new TradingEnvironment(pw,it);
 
             if (mode == "CSV")
             {
@@ -137,7 +138,7 @@ namespace Genitock
             //Ticker.onTick+= (source, e) => { Console.WriteLine($"{e.Rate}");};
             //Console.WriteLine("ca marche");
             //Console.ReadLine();
-            //trading.Buy();
+            trading.Buy();
             Console.ReadLine();
             return;
 

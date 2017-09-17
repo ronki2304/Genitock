@@ -8,6 +8,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Genitock.Poloniex.Live;
+using Genitock.Entity.Live;
+using System.Xml.Serialization;
+using System.IO;
 
 namespace Genitock.Trading
 {
@@ -33,19 +36,22 @@ namespace Genitock.Trading
         public Pair TradedPair { get { return _TradedPair; } }
 
         public IBroker _broker;
+
+        public ITicker _ticker;
  
         private Pair _TradedPair;
 
         /// <summary>
         /// store the stop limit rate from buy action
         /// </summary>
-        private static Double StopLimitrate;
+        private static Double StopLimitBids;
 
-        public TradingEnvironment(IBroker broker)
+        public TradingEnvironment(IBroker broker, ITicker ticker)
         {
             
             Boolean success;
             _broker = broker;
+            _ticker = ticker;
 
             success = Enum.TryParse<Pair>(ConfigurationManager.AppSettings["Trading_Pair"], out _TradedPair);
             if (!success)
@@ -96,9 +102,9 @@ namespace Genitock.Trading
             }
 
             //compute the average rate to determine the stop limit
-            StopLimitrate = allorders.AverageRate * Convert.ToDouble(ConfigurationManager.AppSettings["StopLoss"]);
-            Console.WriteLine($"buy done stop limit rate {StopLimitrate}");
-            Ticker.onTick+= WatchStopLimit;
+            StopLimitBids = allorders.AverageRate * Convert.ToDouble(ConfigurationManager.AppSettings["StopLoss"]);
+            Console.WriteLine($"buy done stop limit rate {StopLimitBids}");
+            _ticker.onTick+= WatchStopLimit;
             state = TradingStatus.InMarket;
             RefreshWallet();
                 
@@ -128,7 +134,7 @@ namespace Genitock.Trading
                 amount = amount - order.totalAmountDoneTargetCurrency;
             }
             Console.WriteLine("disable ticker action");
-            Ticker.onTick -= WatchStopLimit;
+            _ticker.onTick -= WatchStopLimit;
 			RefreshWallet();
             state = TradingStatus.OutMarket;
         }
@@ -143,12 +149,20 @@ namespace Genitock.Trading
         /// </summary>
         /// <param name="source">Source.</param>
         /// <param name="e">E.</param>
-		void WatchStopLimit(object source, Entity.Poloniex.PoloniexArg e)
+		void WatchStopLimit(object source, TickerArgument e)
 		{
 			Console.WriteLine($"Date {DateTime.Now} Pair {e.Pair} Rate {e.Rate}");
-			Console.WriteLine($"Stop loss rate : {StopLimitrate}");
-			if (e.Rate < StopLimitrate)
+			Console.WriteLine($"Stop loss rate : {StopLimitBids}");
+            if (e.HighestBid < StopLimitBids)
 				Sell();
 		}
+
+        void SaveTradingContext()
+        {
+			XmlSerializer xs = new XmlSerializer(typeof(TradingContext));
+			TextWriter WriteFileStream = new StreamWriter(@"test.xml");
+            xs.Serialize(WriteFileStream, context);
+			return;
+        }
     }
 }

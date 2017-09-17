@@ -8,41 +8,43 @@ using WampSharp.V2;
 using WampSharp.V2.Fluent;
 using WampSharp.V2.Client;
 using System.Threading;
+using Genitock.Entity.Live;
+using Genitock.Interface;
 
 namespace Genitock.Poloniex.Live
 {
     /// <summary>
     /// retrieve real time ticker via wamp
     /// </summary>
-    public static class Ticker
+    public class PoloniexTicker : ITicker
     {
         /// <summary>
         /// raise event on each tick
         /// </summary>
-        public static event OnTick onTick;
-        static WampChannelReconnector reconnector;
+        public event OnTick onTick;
+        WampChannelReconnector reconnector;
 
         /// <summary>
         /// last tick received by WAMP
         /// </summary>
-        private static DateTime LastTickReceived;
+        private DateTime LastTickReceived;
 
         /// <summary>
         /// wamp may be overloaded so switch to http get when it ook too long time
         /// </summary>
-        private static Timer tictac;
+        private Timer tictac;
 
         /// <summary>
         /// traded pair
         /// </summary>
-        private static readonly Pair pair = (Pair)Enum.Parse(typeof(Pair), ConfigurationManager.AppSettings["Trading_Pair"]);
+        private readonly Pair pair = (Pair)Enum.Parse(typeof(Pair), ConfigurationManager.AppSettings["Trading_Pair"]);
 
-        static Ticker()
+        public PoloniexTicker()
         {
             LastTickReceived = DateTime.Now;
             //raise every 30sec
-            tictac = new Timer(HandleTimerCallback,null,0,30000);
-           
+            tictac = new Timer(HandleTimerCallback, null, 0, 30000);
+
             //WAMP init
             IWampChannelFactory factory = new WampChannelFactory();
             IWampChannel channel = factory.ConnectToRealm("realm1")
@@ -58,11 +60,13 @@ namespace Genitock.Poloniex.Live
                 {
                     var currencyPair = evt.Arguments[0].Deserialize<string>();
                     var last = evt.Arguments[1].Deserialize<Double>();
+                    var lowestAsk = evt.Arguments[2].Deserialize<Double>();
+                    var highestBids = evt.Arguments[4].Deserialize<Double>();
                     if (currencyPair == pair.ToString())
                     {
                         LastTickReceived = DateTime.Now;
                         Console.WriteLine($"Currencypair: {currencyPair}, Last: {last}, Date: {DateTime.Now}");
-                        onTick(null, new PoloniexArg(currencyPair, last));
+                        onTick(null, new TickerArgument { Pair = currencyPair, Rate = last, HighestBid = highestBids, LowestAsk = lowestAsk });
 
                     }
                 },
@@ -83,18 +87,18 @@ namespace Genitock.Poloniex.Live
         /// if wamp don't return data each 30second call the get data
         /// </summary>
         /// <param name="state">State.</param>
-        static void HandleTimerCallback(object state)
+        void HandleTimerCallback(object state)
         {
-            
+
             TimeSpan ts = DateTime.Now.Subtract(LastTickReceived);
             if (ts.TotalSeconds > 30)
             {
                 PoloniexWrapper pw = new PoloniexWrapper();
 
-                onTick(null, new PoloniexArg("manual", pw.EstimatedLastRate(pair)));
+                onTick(null, new TickerArgument { Pair = "manual", HighestBid = pw.EstimatedLastRate(pair) });
             }
         }
 
-       
+
     }
 }
