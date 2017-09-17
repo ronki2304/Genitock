@@ -84,7 +84,7 @@ namespace Genitock.Poloniex.Live
         }
 
         /// <summary>
-        /// if wamp don't return data each 30second call the get data
+        /// if wamp don't return data every 30 seconds call the get data
         /// </summary>
         /// <param name="state">State.</param>
         void HandleTimerCallback(object state)

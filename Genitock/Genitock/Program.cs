@@ -138,6 +138,9 @@ namespace Genitock
             //Ticker.onTick+= (source, e) => { Console.WriteLine($"{e.Rate}");};
             //Console.WriteLine("ca marche");
             //Console.ReadLine();
+         //   PoloniexWrapper pw = new PoloniexWrapper();
+          //  Console.WriteLine(pw.EstimatedLastRate(Pair.BTC_BCH));
+
             trading.Buy();
             Console.ReadLine();
             return;

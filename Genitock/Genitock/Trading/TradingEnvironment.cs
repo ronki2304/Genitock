@@ -151,7 +151,7 @@ namespace Genitock.Trading
         /// <param name="e">E.</param>
 		void WatchStopLimit(object source, TickerArgument e)
 		{
-			Console.WriteLine($"Date {DateTime.Now} Pair {e.Pair} Rate {e.Rate}");
+            Console.WriteLine($"Date {DateTime.Now} Pair {e.Pair} Rate {e.Rate} HighestBid {e.HighestBid}");
 			Console.WriteLine($"Stop loss rate : {StopLimitBids}");
             if (e.HighestBid < StopLimitBids)
 				Sell();
