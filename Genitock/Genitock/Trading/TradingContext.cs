@@ -1,5 +1,6 @@
 ﻿using System;
 using Genitock.Entity.Poloniex;
+using Genitock.Entity.Poloniex.Market;
 
 namespace Genitock.Trading
 {
@@ -16,7 +17,7 @@ namespace Genitock.Trading
         public DateTime? Position { get; set; }
         public Double Profit { get; set; }
         public Double HighestProfit { get; set; }
-
+        public TradeDone trade { get; set; }
 
          public  TradingContext()
         {

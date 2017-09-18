@@ -113,6 +113,7 @@
     <Reference Include="WampSharp.WebSocket4Net">
       <HintPath>..\packages\WampSharp.WebSocket4Net.1.2.6.42-beta\lib\net45\WampSharp.WebSocket4Net.dll</HintPath>
     </Reference>
+    <Reference Include="System.ServiceProcess" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entity\Poloniex\Chart.cs" />
@@ -137,6 +138,7 @@
     <Compile Include="Trading\TradingContext.cs" />
     <Compile Include="Entity\Live\TickerArgument.cs" />
     <Compile Include="Interface\ITicker.cs" />
+    <Compile Include="Service\RuntimeService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

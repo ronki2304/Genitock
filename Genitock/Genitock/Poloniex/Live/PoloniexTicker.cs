@@ -66,6 +66,9 @@ namespace Genitock.Poloniex.Live
                     {
                         LastTickReceived = DateTime.Now;
                         Console.WriteLine($"Currencypair: {currencyPair}, Last: {last}, Date: {DateTime.Now}");
+
+                        //check if there are some handler
+                        if (onTick!=null)
                         onTick(null, new TickerArgument { Pair = currencyPair, Rate = last, HighestBid = highestBids, LowestAsk = lowestAsk });
 
                     }

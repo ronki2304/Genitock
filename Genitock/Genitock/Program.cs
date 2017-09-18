@@ -134,62 +134,16 @@ namespace Genitock
 
         static void runtime()
         {
-           //TODO check if it is in order
+            //TODO check if it is in order
             //Ticker.onTick+= (source, e) => { Console.WriteLine($"{e.Rate}");};
             //Console.WriteLine("ca marche");
             //Console.ReadLine();
-         //   PoloniexWrapper pw = new PoloniexWrapper();
-          //  Console.WriteLine(pw.EstimatedLastRate(Pair.BTC_BCH));
+            //   PoloniexWrapper pw = new PoloniexWrapper();
+            //  Console.WriteLine(pw.EstimatedLastRate(Pair.BTC_BCH));
 
-            trading.Buy();
             Console.ReadLine();
             return;
 
-            //load config file
-                String sconfigfilePath = Path.Combine(ConfigurationManager.AppSettings["genotick_Path"]
-                    , ConfigurationManager.AppSettings["genotick_configfileName"]);
-            
-            if (!File.Exists(sconfigfilePath))
-            {
-                Console.WriteLine("Config File not found please update genitock config file");
-                return;
-            }
-
-            
-            //if we are already up to date do nothing
-            if (GenotickConfig.NextEndingPoint > DateTime.UtcNow)
-                return;
-
-            //backup data
-            InputData.BackupData();
-
-
-
-            foreach (Pair pair in GenotickConfig.CurrenciesDataFileName)
-            {
-                //getting the last data
-                //for moment assume that all csv have the same date
-                //retrieve missing candle
-                var chart = trading.GetChartData(pair, GenotickConfig.StartingPoint, DateTime.MaxValue, GenotickConfig.PoloniexPeriod);
-
-                InputData.AppendChartDataFile(chart);
-            }
-            //reverse data
-            GenotickExec.ReverseData();
-
-            //update genotick config file
-            GenotickConfig.SaveConfig();
-            //call genotick to analyze
-            var operation =GenotickExec.SetPrediction();
-
-
-
-
-            if (operation == Operation.buy && trading.SourceWallet.amount >Convert.ToDouble(ConfigurationManager.AppSettings["Minimum_trade"]))
-                trading.Buy();
-            if (operation== Operation.sell && trading.TargetWallet.amount > Convert.ToDouble(ConfigurationManager.AppSettings["Minimum_trade"]))
-                trading.Sell();
-            
         }
     }
 }
