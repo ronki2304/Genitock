@@ -21,15 +21,14 @@ namespace Genitock.Trading
     public class TradingEnvironment
     {
 
-        private TradingContext context; 
-      
+        private TradingContext context;
+
 
         /// <summary>
         /// return the wallet which will be used for trading
         /// </summary>
         public Wallet SourceWallet { get; private set; }
         public Wallet TargetWallet { get; private set; }
-        public TradingStatus state { get; private set; }
         /// <summary>
         /// return the target pair for trading
         /// </summary>
@@ -38,7 +37,7 @@ namespace Genitock.Trading
         public IBroker _broker;
 
         public ITicker _ticker;
- 
+
         private Pair _TradedPair;
 
         /// <summary>
@@ -48,7 +47,7 @@ namespace Genitock.Trading
 
         public TradingEnvironment(IBroker broker, ITicker ticker)
         {
-            
+
             Boolean success;
             _broker = broker;
             _ticker = ticker;
@@ -61,8 +60,10 @@ namespace Genitock.Trading
             }
 
             RefreshWallet();
-            state = SourceWallet.amount > TargetWallet.amount ? TradingStatus.OutMarket:TradingStatus.InMarket;
-            context = new TradingContext();
+            LoadTradingContext();
+
+            if (context.CurrentOperation != Operation.Out)
+                Sell();
         }
 
         private void RefreshWallet()
@@ -77,71 +78,106 @@ namespace Genitock.Trading
         public void Buy()
         {
             Console.WriteLine("Init buy process");
-            MarketOrderBook ob= _broker.returnMarketOrderBook(_TradedPair,20);
+            MarketOrderBook ob = _broker.returnMarketOrderBook(_TradedPair, 20);
             Double amount = SourceWallet.amount;
 
             TradeDone allorders = new TradeDone();
             allorders.resultingTrades = new List<ResultingTrade>();
-
-            while (amount> Convert.ToDouble(ConfigurationManager.AppSettings["Minimum_trade"]))
+            context.AmountTraded = 0;
+            while (amount > Convert.ToDouble(ConfigurationManager.AppSettings["Minimum_trade"]))
             {
                 TradeDone order = _broker.Buy(_TradedPair, ob.GetTheNextAsks().rate, amount);
-                if (order.resultingTrades.Count()==0)
+                if (order.resultingTrades.Count() == 0)
                 {
                     Boolean cleanSituation = false;
                     Console.WriteLine("order not executed. clean it");
                     //need to cancel order to rate to high
                     while (!cleanSituation)
-                        cleanSituation=_broker.CancelOrder(order.orderNumber);
+                        cleanSituation = _broker.CancelOrder(order.orderNumber);
                     //restart the process
                     Console.WriteLine("clean complete continue buy process");
                     continue;
                 }
-                amount = amount - order.totalAmountDoneSourceCurrency;
-                allorders.resultingTrades.AddRange(order.resultingTrades);
+                else
+                {
+                    amount = amount - order.totalAmountDoneSourceCurrency;
+                    context.AmountTraded += order.totalAmountDoneSourceCurrency;
+                    allorders.resultingTrades.AddRange(order.resultingTrades);
+                }
             }
 
             //compute the average rate to determine the stop limit
             StopLimitBids = allorders.AverageRate * Convert.ToDouble(ConfigurationManager.AppSettings["StopLoss"]);
             Console.WriteLine($"buy done stop limit rate {StopLimitBids}");
-            _ticker.onTick+= WatchStopLimit;
-            state = TradingStatus.InMarket;
+            _ticker.onTick += WatchStopLimit;
+
+            //update context
+            context.status = TradingStatus.InMarket;
+            context.CurrentOperation = Operation.buy;
+            context.Position = DateTime.Now;
+          
+
+#if DEBUG
+            SaveTradingContext();
+#endif
+            //refresh all amounts
             RefreshWallet();
-                
+
         }
 
         public void Sell()
         {
+            
             Console.WriteLine("Init sell process");
             MarketOrderBook ob = _broker.returnMarketOrderBook(_TradedPair, 20);
             Double amount = TargetWallet.amount;
 
-            while (amount > Convert.ToDouble(ConfigurationManager.AppSettings["Minimum_trade"]))
+			while (amount > Convert.ToDouble(ConfigurationManager.AppSettings["Minimum_trade"]))
             {
-                TradeDone order = _broker.Sell(_TradedPair, ob.GetTheNextBids().rate, amount);
-				if (order.resultingTrades.Count() == 0)
-				{
-					Boolean cleanSituation = false;
-					Console.WriteLine("order not executed. clean it");
-					//need to cancel order to rate to high
-					while (!cleanSituation)
-						cleanSituation = _broker.CancelOrder(order.orderNumber);
-					//restart the process
-					Console.WriteLine("clean complete continue sell process");
-					continue;
-				}
+                TradeDone order= _broker.Sell(_TradedPair, ob.GetTheNextBids().rate, amount);
+                if (order.resultingTrades.Count() == 0)
+                {
+                    Boolean cleanSituation = false;
+                    Console.WriteLine("order not executed. clean it");
+                    //need to cancel order to rate to high
+                    while (!cleanSituation)
+                        cleanSituation = _broker.CancelOrder(order.orderNumber);
+                    //restart the process
+                    Console.WriteLine("clean complete continue sell process");
+                    continue;
+                }
 
                 amount = amount - order.totalAmountDoneTargetCurrency;
             }
             Console.WriteLine("disable ticker action");
-            _ticker.onTick -= WatchStopLimit;
-			RefreshWallet();
-            state = TradingStatus.OutMarket;
+
+
+                _ticker.onTick -= WatchStopLimit;
+
+
+
+            //compute the original amount not traded
+            double initialAmount = SourceWallet.amount;
+
+            RefreshWallet();
+
+            //compute the profit
+            context.Profit=(SourceWallet.amount-initialAmount)/ (context.AmountTraded.Value-initialAmount);
+
+            context.status = TradingStatus.OutMarket;
+            context.CurrentOperation = Operation.Out;
+            context.Position = null;
+
+           // context.Profit = orders
+            
+#if DEBUG
+			SaveTradingContext();
+#endif
         }
 
-        public Chart GetChartData(Pair pair, DateTime dtStart, DateTime dtEnd, Period period)
+			public Chart GetChartData(Pair pair, DateTime dtStart, DateTime dtEnd, Period period)
         {
-            return _broker.GetChartData(pair,dtStart,dtEnd,period);
+            return _broker.GetChartData(pair, dtStart, dtEnd, period);
         }
 
         /// <summary>
@@ -150,19 +186,38 @@ namespace Genitock.Trading
         /// <param name="source">Source.</param>
         /// <param name="e">E.</param>
 		void WatchStopLimit(object source, TickerArgument e)
-		{
+        {
             Console.WriteLine($"Date {DateTime.Now} Pair {e.Pair} Rate {e.Rate} HighestBid {e.HighestBid}");
-			Console.WriteLine($"Stop loss rate : {StopLimitBids}");
+            Console.WriteLine($"Stop loss rate : {StopLimitBids}");
             if (e.HighestBid < StopLimitBids)
-				Sell();
-		}
+                Sell();
+        }
 
         void SaveTradingContext()
         {
-			XmlSerializer xs = new XmlSerializer(typeof(TradingContext));
-			TextWriter WriteFileStream = new StreamWriter(@"test.xml");
+            XmlSerializer xs = new XmlSerializer(typeof(TradingContext));
+            TextWriter WriteFileStream = new StreamWriter(@"tradeconfig.xml");
             xs.Serialize(WriteFileStream, context);
-			return;
+            Console.WriteLine("trading context updated");
+        }
+
+        void LoadTradingContext()
+        {
+            if (File.Exists(@"tradeconfig.xml"))
+            {
+                XmlSerializer xs = new XmlSerializer(typeof(TradingContext));
+                TextReader tr = new StreamReader(@"tradeconfig.xml");
+                context = (TradingContext)xs.Deserialize(tr);
+            }
+            else
+            {
+                context = new TradingContext();
+                context.status = TradingStatus.OutMarket;
+                context.HighestProfit = 1;
+                context.Profit = 1;
+                context.CurrentOperation = Operation.Out;
+            }
+            Console.WriteLine("trading context sucessfully loaded!");
         }
     }
 }

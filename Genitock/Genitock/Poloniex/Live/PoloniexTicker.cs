@@ -69,7 +69,7 @@ namespace Genitock.Poloniex.Live
 
                         //check if there are some handler
                         if (onTick!=null)
-                        onTick(null, new TickerArgument { Pair = currencyPair, Rate = last, HighestBid = highestBids, LowestAsk = lowestAsk });
+                            onTick(null, new TickerArgument { Pair = currencyPair, Rate = last, HighestBid = highestBids, LowestAsk = lowestAsk });
 
                     }
                 },
@@ -97,8 +97,8 @@ namespace Genitock.Poloniex.Live
             if (ts.TotalSeconds > 30)
             {
                 PoloniexWrapper pw = new PoloniexWrapper();
-
-                onTick(null, new TickerArgument { Pair = "manual", HighestBid = pw.EstimatedLastRate(pair) });
+                if (onTick!=null)
+                    onTick(null, new TickerArgument { Pair = "manual", HighestBid = pw.EstimatedLastRate(pair) });
             }
         }
 

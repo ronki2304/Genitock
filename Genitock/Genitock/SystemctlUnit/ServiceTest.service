@@ -1,0 +1,14 @@
+[Unit]
+Description=Test service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/mono-service /usr/test/Servicetest.exe -l:/tmp/service.lock --debug
+WorkingDirectory=/usr/test               
+RestartSec=10
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+

@@ -37,11 +37,7 @@ namespace Genitock
             }
 
             //for the moment only poloniex but may add a new provider
-            Console.WriteLine("Poloniex choosen");
-			IBroker pw = new PoloniexWrapper();
-            ITicker it = new PoloniexTicker();
-            trading = new TradingEnvironment(pw,it);
-
+           
             if (mode == "CSV")
             {
                 //example : mode=CSV dtStart=01/01/1970 dtEnd=01/01/2090 Period=m5 Pair=BTC_ETH ExportPath=c:\temp
@@ -134,14 +130,16 @@ namespace Genitock
 
         static void runtime()
         {
-            //TODO check if it is in order
-            //Ticker.onTick+= (source, e) => { Console.WriteLine($"{e.Rate}");};
-            //Console.WriteLine("ca marche");
-            //Console.ReadLine();
-            //   PoloniexWrapper pw = new PoloniexWrapper();
-            //  Console.WriteLine(pw.EstimatedLastRate(Pair.BTC_BCH));
-
-            Console.ReadLine();
+			//TODO check if it is in order
+			//Ticker.onTick+= (source, e) => { Console.WriteLine($"{e.Rate}");};
+			//Console.WriteLine("ca marche");
+			//Console.ReadLine();
+			//   PoloniexWrapper pw = new PoloniexWrapper();
+			//  Console.WriteLine(pw.EstimatedLastRate(Pair.BTC_BCH));
+			IBroker pw = new PoloniexWrapper();
+			ITicker it = new PoloniexTicker();
+			trading = new TradingEnvironment(pw, it);
+            trading.Buy();
             return;
 
         }

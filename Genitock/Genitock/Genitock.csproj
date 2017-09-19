@@ -143,6 +143,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <None Include="SystemctlUnit\ServiceTest.service" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Entity\Genotick\" />
