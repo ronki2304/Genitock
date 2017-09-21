@@ -114,12 +114,6 @@
 
   </ItemGroup>
 
-  <ItemGroup>
-
-    <None Include="MainWindow.xaml.cs" />
-
-  </ItemGroup>
-
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 
   <ProjectExtensions>
