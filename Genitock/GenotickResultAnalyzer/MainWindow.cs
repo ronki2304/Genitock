@@ -105,21 +105,27 @@ public partial class MainWindow : Gtk.Window
 			return;
 		}
 
-        OK=Int32.TryParse(txtScale.Text, out TrendScale);
-        if (!OK && txtScale.Sensitive)
-		{
-			Dialog dialog = new Dialog("Error"
-									, this
-									, DialogFlags.Modal
-									, "OK", ResponseType.Ok);
+        if (!chkTrend.Active)
+            TrendScale = 1;
+        else
+        {
+            OK = Int32.TryParse(txtScale.Text, out TrendScale);
+            if (!OK && txtScale.Sensitive)
+            {
+                Dialog dialog = new Dialog("Error"
+                                        , this
+                                        , DialogFlags.Modal
+                                        , "OK", ResponseType.Ok);
 
-			var lbl = new Label("Trend Scale must be a numeric");
-			dialog.VBox.PackStart(lbl);
-			lbl.Show();
-			dialog.Run();
-			dialog.Destroy();
-			return;
-		}
+                var lbl = new Label("Trend Scale must be a numeric");
+                dialog.VBox.PackStart(lbl);
+                lbl.Show();
+                dialog.Run();
+                dialog.Destroy();
+                return;
+            }
+        }
+            
        
 
 
@@ -177,15 +183,15 @@ public partial class MainWindow : Gtk.Window
         if (rbNo.Active)
             clipping = new NoClipping();
         else if (rdEMA.Active)
-            clipping = new ExponentialMovingAverage(nbperiod,0.75);
+            clipping = new ExponentialMovingAverage(nbperiod,0.75, TrendScale);
         else if (rdSMA.Active)
             clipping = new SimpleMovingAverage(nbperiod, TrendScale);
         else 
-            clipping = new LinearRegression(nbperiod);
+            clipping = new LinearRegression(nbperiod, TrendScale);
             
         
 
-        TradingSystem sys = new TradingSystem(Convert.ToDouble(txtFees.Text), chk,clipping);
+        TradingSystem sys = new TradingSystem(Convert.ToDouble(txtFees.Text), chk,clipping,0.60,5);
 
 
         Int32 trendcmpt = 1;
@@ -286,7 +292,6 @@ public partial class MainWindow : Gtk.Window
     protected void OnChkTrendToggled(object sender, EventArgs e)
     {
         txtTrend.Sensitive = ((Gtk.CheckButton)sender).Active;
-        lblTrend.Sensitive = ((Gtk.CheckButton)sender).Active;
         btnTickTrend.Sensitive = ((Gtk.CheckButton)sender).Active;
         lblTrendScale.Sensitive= ((Gtk.CheckButton)sender).Active;
         txtScale.Sensitive = ((Gtk.CheckButton)sender).Active;

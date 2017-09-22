@@ -16,6 +16,7 @@ namespace GenotickResultAnalyzer.Entities
     public enum Position
     {
         InMarket,
-        OutMarket
+        OutMarket,
+        VirtualInMarket
     }
 }

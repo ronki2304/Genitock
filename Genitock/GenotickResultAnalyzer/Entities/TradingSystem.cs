@@ -9,16 +9,18 @@ namespace GenotickResultAnalyzer.Entities
 {
     public class TradingSystem
     {
-        public Position position { get; set; }
-        public Double _StopLoss { get; set; }
-        private Double Fees;
-        private Boolean Reinvest;
-        private Double amount;
-        public Trade currentTrade;
-        public List<Trade> trades;
+        Position position;
+        Double _StopLoss;
+        Double Fees;
+        Boolean Reinvest;
+        Double amount;
+        Trade currentTrade;
+        List<Trade> trades;
         Iclipping Predictor;
+        DrawDown DrawDownSystem;
 
-        public TradingSystem(Double fees, Boolean reinvest, Iclipping predictor)
+
+        public TradingSystem(Double fees, Boolean reinvest, Iclipping predictor,Double maxdrawdown, Int32 maxdrawdownInterval)
         {
             Fees = fees;
             Reinvest = reinvest;
@@ -26,23 +28,33 @@ namespace GenotickResultAnalyzer.Entities
             amount = 1;
             trades = new List<Trade>();
             Predictor = predictor;
+            DrawDownSystem = new DrawDown(maxdrawdown, maxdrawdownInterval);
+          
         }
 
         public void Createposition(Double openRate, DateTime key, Prediction prediction, Prediction trend)
         {
             if (position == Position.OutMarket && Predictor.Next(prediction,trend) == Prediction.UP)
             {
-                currentTrade = new Trade(amount);
-                currentTrade.Openkey = key;
-                currentTrade.openRate = openRate;
-                _StopLoss = 0.9 * openRate;
-                position = Position.InMarket;
+                if (DrawDownSystem.AutorizeTrade())
+                {
+                    currentTrade = new Trade(amount);
+                    currentTrade.Openkey = key;
+                    currentTrade.openRate = openRate;
+                    _StopLoss = 0.9 * openRate;
+                    position = Position.InMarket;
+                }
+                else
+                {
+                    position = Position.VirtualInMarket;
+                }
             }
 
         }
 
         public Boolean StopLoss(Double Low, DateTime key)
         {
+            
             if (position == Position.InMarket && Low <= _StopLoss)
             {
                 currentTrade.closeRate = _StopLoss;
@@ -77,10 +89,12 @@ namespace GenotickResultAnalyzer.Entities
                 amount = currentTrade.FinalAmount;
 
             currentTrade.profit = currentTrade.FinalAmount - currentTrade.Initialamount;
+            DrawDownSystem.compute(currentTrade.profit);
         }
         public void close(Double CloseRate, DateTime key, Prediction prediction, Prediction trend)
         {
-            if (position == Position.InMarket && Predictor.Next(prediction,trend) != Prediction.UP)
+            Prediction bet = Predictor.Next(prediction, trend);
+            if (position == Position.InMarket &&  bet!= Prediction.UP)
             {
                 currentTrade.closeRate = CloseRate;
                 currentTrade.Closekey = key;
@@ -92,6 +106,11 @@ namespace GenotickResultAnalyzer.Entities
                 
                 currentTrade = null;
             }
+            if (position == Position.VirtualInMarket && bet != Prediction.UP)
+            {
+                position = Position.OutMarket;
+            }
+                
         }
 
         public List<String> ExportData()

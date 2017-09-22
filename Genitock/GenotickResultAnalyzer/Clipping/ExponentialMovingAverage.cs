@@ -8,21 +8,24 @@ namespace GenotickResultAnalyzer.Clipping
 {
     public class ExponentialMovingAverage:Iclipping
     {
-		List<Prediction> LGenotickPrediction;
+        List<Int32> LGenotickPrediction;
 		Int32 nbOccurrence;
         Double Alpha;
+        Int32 Coeff;
 
 
-        public ExponentialMovingAverage(Int32 period, Double alpha)
+        public ExponentialMovingAverage(Int32 period, Double alpha, int coeff)
         {
 			nbOccurrence = period;
-			LGenotickPrediction = new List<Prediction>();
+			LGenotickPrediction = new List<Int32>();
             Alpha = alpha;
+            Coeff = coeff;
         }
 
         public Prediction Next(Prediction Genotickprediction, Prediction trend)
         {
-			LGenotickPrediction.Add(Genotickprediction);
+			var toadd = Genotickprediction == trend ? ((Int32)Genotickprediction) * Coeff : ((Int32)Genotickprediction);
+			LGenotickPrediction.Add(toadd);
 
 			if (LGenotickPrediction.Count > nbOccurrence)
 				LGenotickPrediction.RemoveAt(0);

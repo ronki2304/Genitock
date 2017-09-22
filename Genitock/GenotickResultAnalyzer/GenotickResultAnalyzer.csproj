@@ -118,6 +118,7 @@
     <Compile Include="Clipping\ExponentialMovingAverage.cs" />
     <Compile Include="Clipping\LinearRegression.cs" />
     <Compile Include="Extension\Extension.cs" />
+    <Compile Include="Entities\DrawDown.cs" />
   </ItemGroup>
 
   <ItemGroup>

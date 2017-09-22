@@ -15,18 +15,21 @@ namespace GenotickResultAnalyzer.Clipping
 			public double Y { get; set; }
 		}
 
-		List<Prediction> LGenotickPrediction;
+        List<Int32> LGenotickPrediction;
 		Int32 nbOccurrence;
+        Int32 Coeff;
 
-        public LinearRegression(Int32 period)
+        public LinearRegression(Int32 period, int coeff)
         {
 			nbOccurrence = period;
-			LGenotickPrediction = new List<Prediction>();
+            LGenotickPrediction = new List<Int32>();
+            Coeff = coeff;
         }
 
         public Prediction Next(Prediction Genotickprediction, Prediction trend)
         {
-			LGenotickPrediction.Add(Genotickprediction);
+            var toadd = Genotickprediction == trend ? ((Int32)Genotickprediction) * Coeff : ((Int32)Genotickprediction);
+            LGenotickPrediction.Add(toadd);
 
 			if (LGenotickPrediction.Count > nbOccurrence)
 				LGenotickPrediction.RemoveAt(0);
@@ -37,7 +40,7 @@ namespace GenotickResultAnalyzer.Clipping
 
             for (int i = 0;i< LGenotickPrediction.Count();i++)
             {
-                points.Add(new Point(){ X=i, Y=(Int32)LGenotickPrediction[i]});
+                points.Add(new Point(){ X=i, Y=LGenotickPrediction[i]});
             }
 
 			var a = points.Variance(p => p.X, p => p.Y) / points.Variance(p => p.X, p => p.X);
