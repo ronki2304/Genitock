@@ -8,24 +8,29 @@ namespace GenotickResultAnalyzer.Clipping
 {
     public class SimpleMovingAverage : Iclipping
     {
-        List<Prediction> LGenotickPrediction;
+        List<Int32> LGenotickPrediction;
         Int32 nbOccurrence;
-        public SimpleMovingAverage(int period)
+        Int32 Coeff;
+        public SimpleMovingAverage(int period, int coeff)
         {
             nbOccurrence = period;
-            LGenotickPrediction = new List<Prediction>();
+            LGenotickPrediction = new List<int>();
+            Coeff = coeff;
         }
 
-        public Prediction Next(Prediction Genotickprediction)
+        public Prediction Next(Prediction Genotickprediction, Prediction trend)
         {
-            LGenotickPrediction.Add(Genotickprediction);
+            //on ajoute un coef si la prediction est dans le sens de la tendance
+            var toadd = Genotickprediction == trend ? ((int)Genotickprediction) * Coeff: ((int)Genotickprediction);
+            LGenotickPrediction.Add(toadd);
 
             if (LGenotickPrediction.Count > nbOccurrence)
                 LGenotickPrediction.RemoveAt(0);
             else
                 return Prediction.OUT;
 
-            var avg = LGenotickPrediction.Average(p => (int)p);
+            var avg = LGenotickPrediction.Average(p => p);
+          
 
             if (avg > ((int)Prediction.UP)/10)
                 return Prediction.UP;

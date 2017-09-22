@@ -5,6 +5,6 @@ namespace GenotickResultAnalyzer.Interface
 {
     public interface Iclipping
     {
-        Prediction Next(Prediction Genotickprediction);
+        Prediction Next(Prediction Genotickprediction,Prediction trend);
     }
 }

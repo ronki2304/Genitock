@@ -10,7 +10,7 @@ namespace GenotickResultAnalyzer.Entities
     {
         UP=1,
         OUT=0,
-        DOWN=-2
+        DOWN=-1
     }
 
     public enum Position

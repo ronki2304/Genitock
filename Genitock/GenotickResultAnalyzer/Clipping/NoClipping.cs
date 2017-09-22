@@ -10,7 +10,7 @@ namespace GenotickResultAnalyzer.Clipping
         {
         }
 
-        public Prediction Next(Prediction Genotickprediction)
+        public Prediction Next(Prediction Genotickprediction,Prediction trend)
         {
             return Genotickprediction;
         }

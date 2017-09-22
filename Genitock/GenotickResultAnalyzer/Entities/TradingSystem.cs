@@ -28,9 +28,9 @@ namespace GenotickResultAnalyzer.Entities
             Predictor = predictor;
         }
 
-        public void Createposition(Double openRate, DateTime key, Prediction prediction)
+        public void Createposition(Double openRate, DateTime key, Prediction prediction, Prediction trend)
         {
-            if (position == Position.OutMarket && Predictor.Next(prediction) == Prediction.UP)
+            if (position == Position.OutMarket && Predictor.Next(prediction,trend) == Prediction.UP)
             {
                 currentTrade = new Trade(amount);
                 currentTrade.Openkey = key;
@@ -78,9 +78,9 @@ namespace GenotickResultAnalyzer.Entities
 
             currentTrade.profit = currentTrade.FinalAmount - currentTrade.Initialamount;
         }
-        public void close(Double CloseRate, DateTime key, Prediction prediction)
+        public void close(Double CloseRate, DateTime key, Prediction prediction, Prediction trend)
         {
-            if (position == Position.InMarket && Predictor.Next(prediction) != Prediction.UP)
+            if (position == Position.InMarket && Predictor.Next(prediction,trend) != Prediction.UP)
             {
                 currentTrade.closeRate = CloseRate;
                 currentTrade.Closekey = key;

@@ -122,6 +122,10 @@ namespace Genitock
         /// <param name="ExportPath">Export path.</param>
         private static void ExportData(Pair pair, DateTime dtstart, DateTime dtstop, Period period, String ExportPath)
         {
+			IBroker pw = new PoloniexWrapper();
+			ITicker it = new PoloniexTicker();
+			trading = new TradingEnvironment(pw, it);
+
             var chart = trading.GetChartData(pair, dtstart, dtstop, period);
 
             //write the file

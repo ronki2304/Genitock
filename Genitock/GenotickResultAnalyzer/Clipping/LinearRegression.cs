@@ -24,7 +24,7 @@ namespace GenotickResultAnalyzer.Clipping
 			LGenotickPrediction = new List<Prediction>();
         }
 
-        public Prediction Next(Prediction Genotickprediction)
+        public Prediction Next(Prediction Genotickprediction, Prediction trend)
         {
 			LGenotickPrediction.Add(Genotickprediction);
 

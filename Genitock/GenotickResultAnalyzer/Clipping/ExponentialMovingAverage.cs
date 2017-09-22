@@ -20,7 +20,7 @@ namespace GenotickResultAnalyzer.Clipping
             Alpha = alpha;
         }
 
-        public Prediction Next(Prediction Genotickprediction)
+        public Prediction Next(Prediction Genotickprediction, Prediction trend)
         {
 			LGenotickPrediction.Add(Genotickprediction);
 

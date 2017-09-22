@@ -18,5 +18,6 @@ namespace GenotickResultAnalyzer.Entities
         public Double High { get; set; }
         public Double Low { get; set; }
         public Prediction prediction { get; set; }
+        public Prediction Trend { get; set; }
     }
 }
