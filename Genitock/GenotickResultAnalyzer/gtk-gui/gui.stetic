@@ -63,7 +63,6 @@
                     <property name="MemberName" />
                     <property name="CanFocus">True</property>
                     <property name="Label" translatable="yes">NoClipping</property>
-                    <property name="Active">True</property>
                     <property name="DrawIndicator">True</property>
                     <property name="HasLabel">True</property>
                     <property name="UseUnderline">True</property>
@@ -387,6 +386,7 @@
                         <child>
                           <widget class="Gtk.Label" id="lblTrendScale">
                             <property name="MemberName" />
+                            <property name="Sensitive">False</property>
                             <property name="LabelProp" translatable="yes">TrendScale</property>
                           </widget>
                           <packing>
@@ -399,7 +399,9 @@
                         <child>
                           <widget class="Gtk.Entry" id="txtScale">
                             <property name="MemberName" />
+                            <property name="Sensitive">False</property>
                             <property name="CanFocus">True</property>
+                            <property name="Text" translatable="yes">4</property>
                             <property name="IsEditable">True</property>
                             <property name="InvisibleChar">●</property>
                           </widget>

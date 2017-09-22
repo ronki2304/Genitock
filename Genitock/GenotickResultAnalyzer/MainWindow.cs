@@ -57,7 +57,7 @@ public partial class MainWindow : Gtk.Window
         #region check
         //verification que le SL est bien numerique
         Double SL, fees;
-        Int32 nbperiod;
+        Int32 nbperiod, TrendScale;
 		Boolean OK = Double.TryParse(txtSL.Text, out SL);
 		if (!OK)
 		{
@@ -89,7 +89,7 @@ public partial class MainWindow : Gtk.Window
 			return;
 		}
 
-        Int32.TryParse(txtNbPeriod.Text, out nbperiod);
+       OK= Int32.TryParse(txtNbPeriod.Text, out nbperiod);
         if (!OK && txtNbPeriod.Sensitive)
 		{
 			Dialog dialog = new Dialog("Error"
@@ -104,6 +104,23 @@ public partial class MainWindow : Gtk.Window
 			dialog.Destroy();
 			return;
 		}
+
+        OK=Int32.TryParse(txtScale.Text, out TrendScale);
+        if (!OK && txtScale.Sensitive)
+		{
+			Dialog dialog = new Dialog("Error"
+									, this
+									, DialogFlags.Modal
+									, "OK", ResponseType.Ok);
+
+			var lbl = new Label("Trend Scale must be a numeric");
+			dialog.VBox.PackStart(lbl);
+			lbl.Show();
+			dialog.Run();
+			dialog.Destroy();
+			return;
+		}
+       
 
 
         if (!File.Exists(txtpathTick.Text))
@@ -162,7 +179,7 @@ public partial class MainWindow : Gtk.Window
         else if (rdEMA.Active)
             clipping = new ExponentialMovingAverage(nbperiod,0.75);
         else if (rdSMA.Active)
-            clipping = new SimpleMovingAverage(nbperiod);
+            clipping = new SimpleMovingAverage(nbperiod, TrendScale);
         else 
             clipping = new LinearRegression(nbperiod);
             
