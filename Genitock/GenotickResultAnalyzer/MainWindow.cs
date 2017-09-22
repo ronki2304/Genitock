@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using GenotickResultAnalyzer.Clipping;
 using GenotickResultAnalyzer.Entities;
+using GenotickResultAnalyzer.Interface;
 using Gtk;
 
 public partial class MainWindow : Gtk.Window
@@ -55,6 +57,7 @@ public partial class MainWindow : Gtk.Window
       
 		//verification que le SL est bien numerique
 		Double SL, fees;
+        Int32 nbperiod;
 		Boolean OK = Double.TryParse(txtSL.Text, out SL);
 		if (!OK)
 		{
@@ -70,7 +73,7 @@ public partial class MainWindow : Gtk.Window
             dialog.Destroy();
 			return;
 		}
-		Double.TryParse(txtSL.Text, out fees);
+        Double.TryParse(txtFees.Text, out fees);
 		if (!OK)
         {
 			Dialog dialog = new Dialog("Error"
@@ -79,6 +82,22 @@ public partial class MainWindow : Gtk.Window
                                     , "OK", ResponseType.Ok);
 
 			var lbl = new Label("fees must be a numeric");
+			dialog.VBox.PackStart(lbl);
+			lbl.Show();
+			dialog.Run();
+			dialog.Destroy();
+			return;
+		}
+
+        Int32.TryParse(txtNbPeriod.Text, out nbperiod);
+        if (!OK && txtNbPeriod.Sensitive)
+		{
+			Dialog dialog = new Dialog("Error"
+									, this
+									, DialogFlags.Modal
+									, "OK", ResponseType.Ok);
+
+			var lbl = new Label("nbPeriod must be a numeric");
 			dialog.VBox.PackStart(lbl);
 			lbl.Show();
 			dialog.Run();
@@ -127,7 +146,22 @@ public partial class MainWindow : Gtk.Window
 		//recuperation des lignes uniquement pour la paire analysée et exclusion du reverse
 		List<String> AllPrediction = File.ReadAllLines(txtpathProfit.Text).ToList().Where(p => p.Contains(fi.Name) && !p.Contains("reverse")).ToList();
         Boolean chk = chkReinvest.Active;
-		TradingSystem sys = new TradingSystem(Convert.ToDouble(txtFees.Text), chk);
+
+
+        Iclipping clipping;
+        //chargement de la méthode de reduction de bruit
+        if (rbNo.Active)
+            clipping = new NoClipping();
+        else if (rdEMA.Active)
+            clipping = new ExponentialMovingAverage(nbperiod,0.75);
+        else if (rdSMA.Active)
+            clipping = new SimpleMovingAverage(nbperiod);
+        else 
+            clipping = new LinearRegression(nbperiod);
+            
+        
+
+        TradingSystem sys = new TradingSystem(Convert.ToDouble(txtFees.Text), chk,clipping);
 
         int offset = 1;
 		for (int i = 1; i < AllTicks.Count; i++)
@@ -162,9 +196,34 @@ public partial class MainWindow : Gtk.Window
         File.WriteAllLines(filename, sys.ExportData());
     }
 
+  
+
+   
+
+    protected void OnRdPressed(object sender, EventArgs e)
+    {
+        if (((Gtk.RadioButton)sender).Name == "rbNo")
+            txtNbPeriod.Sensitive = false;
+        else
+            txtNbPeriod.Sensitive = true;
+
+        if (((Gtk.RadioButton)sender).Name =="rdEMA")
+        {
+            txtAlpha.Visible = true;
+            lblAlpha.Visible = true;
+        }
+        else
+        {
+            txtAlpha.Visible = false;
+            lblAlpha.Visible = false;
+        }
+    }
+
     protected void OnChkMarginToggled(object sender, EventArgs e)
     {
-        
-        //lblMarginRate.dis;
+        lblMarginRate.Visible = ((Gtk.CheckButton)sender).Active;
+        txtMarginRate.Visible = ((Gtk.CheckButton)sender).Active;
+
+    
     }
 }

@@ -112,8 +112,19 @@
 
     <Compile Include="Entities\enum.cs" />
 
+    <Compile Include="Interface\Iclipping.cs" />
+    <Compile Include="Clipping\SimpleMovingAverage.cs" />
+    <Compile Include="Clipping\NoClipping.cs" />
+    <Compile Include="Clipping\ExponentialMovingAverage.cs" />
+    <Compile Include="Clipping\LinearRegression.cs" />
+    <Compile Include="Extension\Extension.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Interface\" />
+    <Folder Include="Clipping\" />
+    <Folder Include="Extension\" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 
   <ProjectExtensions>

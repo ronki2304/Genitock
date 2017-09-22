@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GenotickResultAnalyzer.Interface;
 
 namespace GenotickResultAnalyzer.Entities
 {
@@ -15,19 +16,21 @@ namespace GenotickResultAnalyzer.Entities
         private Double amount;
         public Trade currentTrade;
         public List<Trade> trades;
+        Iclipping Predictor;
 
-        public TradingSystem(Double fees, Boolean reinvest)
+        public TradingSystem(Double fees, Boolean reinvest, Iclipping predictor)
         {
             Fees = fees;
             Reinvest = reinvest;
             position = Position.OutMarket;
             amount = 1;
             trades = new List<Trade>();
+            Predictor = predictor;
         }
 
         public void Createposition(Double openRate, DateTime key, Prediction prediction)
         {
-            if (position == Position.OutMarket && prediction == Prediction.UP)
+            if (position == Position.OutMarket && Predictor.Next(prediction) == Prediction.UP)
             {
                 currentTrade = new Trade(amount);
                 currentTrade.Openkey = key;
@@ -77,7 +80,7 @@ namespace GenotickResultAnalyzer.Entities
         }
         public void close(Double CloseRate, DateTime key, Prediction prediction)
         {
-            if (position == Position.InMarket && prediction != Prediction.UP)
+            if (position == Position.InMarket && Predictor.Next(prediction) != Prediction.UP)
             {
                 currentTrade.closeRate = CloseRate;
                 currentTrade.Closekey = key;

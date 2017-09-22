@@ -8,9 +8,9 @@ namespace GenotickResultAnalyzer.Entities
 {
     public enum Prediction
     {
-        UP,
-        OUT,
-        DOWN
+        UP=1,
+        OUT=0,
+        DOWN=-2
     }
 
     public enum Position
